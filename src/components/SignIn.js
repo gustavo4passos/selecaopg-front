@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Paper, makeStyles, Typography } from '@material-ui/core'
+import { Paper, makeStyles, Typography, Button } from '@material-ui/core'
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -17,7 +17,7 @@ function SignIn() {
 	return (
 		<div className='login'>
 			<Paper className={classes.root}>
-				
+				<Button color='primary' variant='contained'>Logar</Button>
 			</Paper>
 		</div>
 	)
