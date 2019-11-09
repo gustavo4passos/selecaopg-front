@@ -1,1 +1,1 @@
-const auth = true
+export const isAuthenticated = () => false

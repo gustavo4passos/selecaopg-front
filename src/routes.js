@@ -1,13 +1,19 @@
 import React from 'react'
 
-import { Switch, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+
+import { PublicRoute } from './components/PublicRoute'
+import { PrivateRoute } from './components/PrivateRoute';
 
 import SignIn from './components/SignIn'
 
 const Routes = () => ((
-    <Switch>
-       <Route path='/signin' component={SignIn}/>     
-    </Switch>
+    <Router>
+        <Switch>
+            <PublicRoute path='/entrar' component={SignIn} restricted={true}/>     
+            <PrivateRoute path='/' component={Selection}/>
+        </Switch>
+    </Router>
 ))
 
 export default Routes
