@@ -12,6 +12,7 @@ import { ValidatorForm, TextValidator, SelectValidator } from 'react-material-ui
 import $ from 'jquery'
 
 import logoUFBA from '../assets/imgs/logoufba.png'
+import { pink } from '@material-ui/core/colors';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -74,8 +75,55 @@ const useStyles = makeStyles(theme => ({
 const MAX_FILE_SIZE = 15000000;
 
 const tables = {
-
+	Conceito : {
+		'A': 9.5 ,
+		'B': 8.0 ,
+		'C': 6.0 ,
+		'D': 4.5 ,
+		'E': 2.0
+	},
+	Area : {
+		'computacao': 1.0,
+		'matematica': 0.9,
+		'otherExact': 0.7,
+		'other': 0.5
+	},
+	ENADE : {
+		'1': [ 7.7 , 0.73],
+		'2': [ 7.42, 0.76],
+		'3': [ 7.15, 0.78],
+		'4': [ 6.88, 0.81],
+		'5': [ 6.60, 0.84]
+	},
+	Categoria : {
+		Qualis : {
+			'A1': 10.0,
+			'A2': 8.5,
+			'B1': 7.0,
+			'B2': 5.0,
+			'B3': 2.0,
+			'B4': 1.0,
+			'B5': 0.5,
+			'SBC': 0.5
+		},
+		Outros : {
+			'patente': 2.5,
+			'livro': 2.0,
+			'capitulo': 1.0,
+			'resumo': 0.5,
+			'minicurso': 0.5,
+			'relatorio': 0.5
+		}
+	},
+	Capes : {
+		'2' : 0.6,
+		'3' : 0.8
+	}
 }
+
+const arrayQualis = Object.keys(tables.Categoria.Qualis)
+
+const arrayOutros = Object.keys(tables.Categoria.Outros)
 
 function Enrollment() {
 	const classes = useStyles()
@@ -127,7 +175,9 @@ function Enrollment() {
 
 	const handleSubmit = (e) => {
 		let formData = new FormData();
-		let score = 0
+		let publications = [];
+		let score = 0;
+		
 		
 		formData.append('name', name);
 		formData.append('email', email)
@@ -138,16 +188,94 @@ function Enrollment() {
 		formData.append('undergraduate_university', undergraduateUniversity);
 		formData.append('enade_link', enadeLink);
 
+		//RG + CRPG + PI
+
+		let RG = 0;
+		let CRPG = 0;
+		let PI = 0;
+		let ponderada = 1;
+		let qualis = 0;
+		let outros = 0;
+
+		if( degree == 'masters'){
+			let ira = 0;
+			let mediaEnade = ENADE[enade][0];
+			let devEnade = ENADE[enade][1];
+			let noteArea = Area[area];
+
+			if ( noteType == 'cr')
+				ira = noteRG;
+			else
+				ira = Conceito[noteRG];
+
+			if(mastersFreshman){
+				ponderada = 0.3;
+			}
+			else if(capes < 4){
+				ponderada = Capes[capes];
+			}
+
+			RG = min(10.0, ( 1.67 * (ira - mediaEnade)/devEnade ) + 5.00) * noteArea;
+
+			CRPG = noteCRPG * ponderada;
+		}
+		else if( degree == 'doctorate'){
+
+			if(capes < 4){
+				ponderada = Capes[capes];
+			}
+
+			CRPG = noteCRPG * ponderada;
+		}
+
+		let countOutros = [ 0, 0, 0, 0, 0, 0];
+
+		for(producao of scientificProductions){
+
+			let formPublication = new FormData();
+
+			formPublication.append('category', producao.category);
+
+			if(producao.publicationMode == 'link'){
+				formPublication.append('link', producao.publicationLink);
+			}
+			else{
+				if(validateFile(producao.publicationFile, ['pdf'], MAX_FILE_SIZE))
+					formPublication.append('file', producao.publicationFile);
+			}
+			
+			let indexQualis = arrayQualis.indexof(producao.category);
+			if(indexQualis != -1){
+				qualis += Categoria.Qualis[producao.category];
+				formPublication.append('score', Categoria.Qualis[producao.category]);
+			}
+			else{
+				let indexOutros = arrayOutros.indexof(producao.category);
+
+				if(indexOutros != -1){
+					if(countOutros[indexOutros] < 2){
+						countOutros[indexOutros]++;
+						outros = max(5.0, outros + Categoria.Outros[producao.category]);
+						
+					}
+					formPublication.append('score', Categoria.Outros[producao.category]);
+				}
+			}
+
+			publications.push(formPublication);
+		}
+
+		PI = max(qualis + outros, 10.0);
+
+		score = RG + CPRG + PI;
+
+		formData.append('score', score);
+
 		if(validateFile(undergraduateTranscript, ['pdf'], MAX_FILE_SIZE))
 			formData.append('undergraduate_transcript', undergraduateTranscript);
 		
 		if(validateFile(graduateTranscript, ['pdf'], MAX_FILE_SIZE))
 			formData.append('graduate_transcript', graduateTranscript);
-
-		formData.append('scientific_production', scientificProduction);
-
-		if(validateFile(publications, ['zip'], MAX_FILE_SIZE))
-			formData.append('publications', publications);
 
 		const config = {
 			headers:{ 'content-type': 'multipart/form-data' }
@@ -416,7 +544,6 @@ function Enrollment() {
 								onChange={(e) => handleInput('capes', e.target.value)}
 								fullWidth
 							>	
-								<MenuItem value='1'>1</MenuItem>
 								<MenuItem value='2'>2</MenuItem>
 								<MenuItem value='3'>3</MenuItem>
 								<MenuItem value='4'>4</MenuItem>
