@@ -6,12 +6,11 @@ import { PublicRoute } from './components/PublicRoute'
 import { PrivateRoute } from './components/PrivateRoute';
 
 import SignIn from './components/SignIn'
-import SignUp from './components/SignUp'
 
 const Routes = () => ((
     <Router>
         <Switch>
-            <PublicRoute path='/entrar' component={SignUp} restricted={true}/>     
+            <PublicRoute path='/entrar' component={SignIn} restricted={true}/>     
             <PrivateRoute path='/' component={Selection}/>
         </Switch>
     </Router>

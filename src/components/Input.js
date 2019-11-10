@@ -19,10 +19,14 @@ export const Form = (props) => {
 
 export const Input = (props) => {
 	const [value, setValue] = props.stateValue;
-    const validators = (props.validators) ? props.validators.concat(['validateField']) : ['validateField']
-  
-    ValidatorForm.addValidationRule('validateField', (value) => {
-        return (props.validateField) ? props.validateField() : true
+    const validators = (props.validators)
+
+    ValidatorForm.addValidationRule('isPassword', (value) => {
+        return value.length >= 6
+    });
+
+    ValidatorForm.addValidationRule('customValidation', (value) => {
+        return props.customValidation(value)
     });
   
 	const handleChange = event => {

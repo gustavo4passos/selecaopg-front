@@ -38,8 +38,6 @@ function SignUp(props) {
 	const [password, setPassword] = React.useState('')
 	const [repeatPassword, setRepeatPassword] = React.useState('')
 
-	const validatePassword = () => (password.length >= 6)
-
 	const validateRepeatPassword = () => (repeatPassword === password)
 
 	const handleSubmit = () => {
@@ -86,8 +84,7 @@ function SignUp(props) {
 									label={constants.passwordLabel}
 									type="password"
 									stateValue={[password, setPassword]}
-									validateField={validatePassword}
-									validators={['required']}
+									validators={['required', 'isPassword']}
 									errorMessages={['Esse campo é obrigatório', 'Mínimo de 6 caracteres']}
 									/>
 							</Grid>
@@ -96,9 +93,9 @@ function SignUp(props) {
 									label={constants.repeatPasswordLabel}
 									type="password"
 									stateValue={[repeatPassword, setRepeatPassword]}
-									validators={['required']}
-									validateField={validateRepeatPassword}
-									errorMessages={['Esse campo é obrigatório', 'As senhas não estão iguais']}
+									validators={['required', 'customValidation']}
+									customValidation={validateRepeatPassword}
+									errorMessages={['Esse campo é obrigatório', 'As senhas não são iguais']}
 									/>
 							</Grid>
 							<Grid item xs className={classes.gridForm}>								
