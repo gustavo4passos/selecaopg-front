@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { makeStyles } from '@material-ui/styles'
 import { Paper, Grid, Typography, Button, FormLabel, RadioGroup, FormControlLabel, Radio, FormControl } from '@material-ui/core';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator'
+import api from './../services/api'
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -27,6 +28,8 @@ const useStyles = makeStyles(theme => ({
 	}
 }))
 
+const MAX_FILE_SIZE = 15000000;
+
 
 function Enrollment() {
 	const classes = useStyles()
@@ -46,6 +49,16 @@ function Enrollment() {
 		publications: ''
 	})
 
+	const validateFile = (file, types, size) => {
+		if ( !(types.indexof(file.name.split('.')[1]) != -1) ) {
+			return false;
+		}
+		if ( file.size > size ){
+			return false;
+		}
+		return true;
+	}
+
 	const handleSubmit = (e) => {
 		const { 
 			name, email, phone,
@@ -55,6 +68,37 @@ function Enrollment() {
 			graduateTranscript, scientificProduction,
 			publications
 		} = inputs
+
+		let formData = new FormData();
+
+		formData.append('name', name);
+		formData.append('email', email)
+		formData.append('phone', phone);
+		formData.append('advisor_name', advisorName);
+		formData.append('entry_semester', entrySemester);
+		formData.append('lattes_link', lattesLink);
+		formData.append('undergraduate_university', undergraduateUniversity);
+		formData.append('enade_link', enadeLink);
+
+		if(validateFile(undergraduateTranscript, ['pdf'], MAX_FILE_SIZE))
+			formData.append('undergraduate_transcript', undergraduateTranscript);
+		
+		if(validateFile(graduateTranscript, ['pdf'], MAX_FILE_SIZE))
+			formData.append('graduate_transcript', graduateTranscript);
+
+		formData.append('scientific_production', scientificProduction);
+
+		if(validateFile(publications, ['zip'], MAX_FILE_SIZE))
+			formData.append('publications', publications);
+
+		const config = {
+			headers:{ 'content-type': 'multipart/form-data' }
+		}
+
+		api.post(formData, config)
+		.then(response => { console.log(response); })
+		.catch(error => { console.log(error); })
+
 	}
 
 	const handleInput = (key, value) => {
