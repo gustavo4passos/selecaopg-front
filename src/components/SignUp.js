@@ -12,15 +12,17 @@ const useStyles = makeStyles(theme => ({
 		maxWidth: '700px',
 		minHeight: '600px',
 		padding: theme.spacing(4),
+		alignItems: 'center',
+		display: 'flex'
 	},
 	grid: {
 		width: '100%',
 		flexDirection: 'column',
 		alignItems: 'center',
+		marginBottom: theme.spacing(5)
 		// backgroundColor: 'red',
 	},
 	gridItem: {
-		paddingTop: theme.spacing(2),
 		width: '50%',
 		alignItems: 'center'
 	},
