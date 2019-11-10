@@ -11,8 +11,9 @@ import { ValidatorForm, TextValidator, SelectValidator } from 'react-material-ui
 
 import $ from 'jquery'
 
+import api from '../services/api'
+
 import logoUFBA from '../assets/imgs/logoufba.png'
-import { pink } from '@material-ui/core/colors';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -122,7 +123,6 @@ const tables = {
 }
 
 const arrayQualis = Object.keys(tables.Categoria.Qualis)
-
 const arrayOutros = Object.keys(tables.Categoria.Outros)
 
 function Enrollment() {
@@ -163,8 +163,21 @@ function Enrollment() {
 		undergraduateTranscript, graduateTranscript, 
 	} = inputs
 
+	useEffect(() => {
+		setInputs({
+			...inputs,
+			name: 'a',
+			email: 'igoor1205@gmail.com',
+			phone: '71',
+			degree: 'doctorate',
+			noteType: 'cr',
+			noteRG: '9',
+
+		})
+	}, [])
+
 	const validateFile = (file, types, size) => {
-		if ( !(types.indexof(file.name.split('.')[1]) != -1) ) {
+		if ( !(types.indexOf(file.name.split('.')[1]) != -1) ) {
 			return false;
 		}
 		if ( file.size > size ){
@@ -174,19 +187,16 @@ function Enrollment() {
 	}
 
 	const handleSubmit = (e) => {
-		let formData = new FormData();
-		let publications = [];
-		let score = 0;
-		
-		
-		formData.append('name', name);
-		formData.append('email', email)
-		formData.append('phone', phone);
-		formData.append('advisor_name', advisorName);
-		formData.append('entry_semester', entrySemester);
-		formData.append('lattes_link', lattesLink);
-		formData.append('undergraduate_university', undergraduateUniversity);
-		formData.append('enade_link', enadeLink);
+		let formData = new FormData()
+		let publications = []
+		let score = 0
+
+		formData.append('entry_semester', entrySemester)
+		formData.append('degree', degree)
+		formData.append('advisor_name', advisorName)
+		formData.append('lattes_link', lattesLink)
+		formData.append('undergraduate_university', undergraduateUniversity)
+		formData.append('enade_link', enadeLink)
 
 		//RG + CRPG + PI
 
@@ -197,14 +207,16 @@ function Enrollment() {
 		let qualis = 0;
 		let outros = 0;
 
-		if( degree == 'masters'){
+		const { ENADE, Area, Capes, Categoria, Conceito } = tables
+
+		if(degree == 'masters'){
 			let ira = 0;
 			let mediaEnade = ENADE[enade][0];
 			let devEnade = ENADE[enade][1];
 			let noteArea = Area[area];
 
 			if ( noteType == 'cr')
-				ira = noteRG;
+				ira = Number(noteRG);
 			else
 				ira = Conceito[noteRG];
 
@@ -215,12 +227,11 @@ function Enrollment() {
 				ponderada = Capes[capes];
 			}
 
-			RG = min(10.0, ( 1.67 * (ira - mediaEnade)/devEnade ) + 5.00) * noteArea;
+			RG = Math.min(10.0, ( 1.67 * (ira - mediaEnade)/devEnade ) + 5.00) * noteArea;
 
 			CRPG = noteCRPG * ponderada;
 		}
 		else if( degree == 'doctorate'){
-
 			if(capes < 4){
 				ponderada = Capes[capes];
 			}
@@ -230,7 +241,7 @@ function Enrollment() {
 
 		let countOutros = [ 0, 0, 0, 0, 0, 0];
 
-		for(producao of scientificProductions){
+		for(let producao of scientificProductions){
 
 			let formPublication = new FormData();
 
@@ -244,18 +255,18 @@ function Enrollment() {
 					formPublication.append('file', producao.publicationFile);
 			}
 			
-			let indexQualis = arrayQualis.indexof(producao.category);
+			let indexQualis = arrayQualis.indexOf(producao.category);
 			if(indexQualis != -1){
 				qualis += Categoria.Qualis[producao.category];
 				formPublication.append('score', Categoria.Qualis[producao.category]);
 			}
 			else{
-				let indexOutros = arrayOutros.indexof(producao.category);
+				let indexOutros = arrayOutros.indexOf(producao.category);
 
 				if(indexOutros != -1){
 					if(countOutros[indexOutros] < 2){
 						countOutros[indexOutros]++;
-						outros = max(5.0, outros + Categoria.Outros[producao.category]);
+						outros = Math.min(5.0, outros + Categoria.Outros[producao.category]);
 						
 					}
 					formPublication.append('score', Categoria.Outros[producao.category]);
@@ -264,24 +275,27 @@ function Enrollment() {
 
 			publications.push(formPublication);
 		}
-
-		PI = max(qualis + outros, 10.0);
-
-		score = RG + CPRG + PI;
+		console.log('qualis', qualis)
+		console.log('outros', outros)
+		PI = Math.min(qualis + outros, 10.0);
+		console.log('RG', RG)
+		console.log('CRPG', CRPG)
+		console.log('PI', PI)
+		score = RG + CRPG + PI;
 
 		formData.append('score', score);
 
-		if(validateFile(undergraduateTranscript, ['pdf'], MAX_FILE_SIZE))
-			formData.append('undergraduate_transcript', undergraduateTranscript);
+		if(!validateFile(undergraduateTranscript, ['pdf'], MAX_FILE_SIZE)) return
+		formData.append('undergraduate_transcript', undergraduateTranscript);
 		
-		if(validateFile(graduateTranscript, ['pdf'], MAX_FILE_SIZE))
-			formData.append('graduate_transcript', graduateTranscript);
+		if(!validateFile(graduateTranscript, ['pdf'], MAX_FILE_SIZE)) return
+		formData.append('graduate_transcript', graduateTranscript);
 
 		const config = {
-			headers:{ 'content-type': 'multipart/form-data' }
+			headers: { 'content-type': 'multipart/form-data' }
 		}
 
-		api.post(formData, config)
+		api.post('/enrollments', formData, config)
 		.then(response => { console.log(response); })
 		.catch(error => { console.log(error); })
   	}
@@ -433,7 +447,7 @@ function Enrollment() {
 					<Grid item xs={12}>
 						<FormControl color='primary'>
 							<FormLabel component='p'>Curso do Candidato(a) *</FormLabel>
-							<RadioGroup name='degree' onChange={e => handleInput('degree', e.target.value)}>
+							<RadioGroup name='degree' value={degree} onChange={e => handleInput('degree', e.target.value)}>
 								<FormControlLabel value='masters' label='Mestrado' control={<Radio color='primary'/>}/>
 								<FormControlLabel value='doctorate' label='Doutorado' control={<Radio color='primary'/>}/>
 							</RadioGroup>
