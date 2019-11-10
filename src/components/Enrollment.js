@@ -73,6 +73,9 @@ const useStyles = makeStyles(theme => ({
 
 const MAX_FILE_SIZE = 15000000;
 
+const tables = {
+
+}
 
 function Enrollment() {
 	const classes = useStyles()
@@ -81,13 +84,15 @@ function Enrollment() {
 		name: '',
 		email: '',
 		phone: '',
-		degree: '',
-		mastersFreshman: false,
 		advisorName: '',
 		entrySemester: '',
 		lattesLink: '',
 		undergraduateUniversity: '',
 		enadeLink: '',
+
+		degree: '', // MASTERS OR DOCTORATE
+		mastersFreshman: false,
+		
 		noteType: 'cr',
 		noteRG: '',
 		area: '',
@@ -95,19 +100,19 @@ function Enrollment() {
 		noteCRPG: '',
 		capes: '',
 		scientificProductions: [],
+
 		undergraduateTranscript: new File([], ''),
 		graduateTranscript: new File([], ''),
 	})
   
-  const { 
+  	const { 
 		name, email, phone, degree,
 		mastersFreshman, noteType, noteRG, 
 		area, enade, noteCRPG, capes, 
 		advisorName, entrySemester,
 		lattesLink, undergraduateUniversity,
-		enadeLink, undergraduateTranscript,
-		graduateTranscript, scientificProductions,
-		publications
+		enadeLink, scientificProductions, 
+		undergraduateTranscript, graduateTranscript, 
 	} = inputs
 
 	const validateFile = (file, types, size) => {
@@ -122,7 +127,8 @@ function Enrollment() {
 
 	const handleSubmit = (e) => {
 		let formData = new FormData();
-
+		let score = 0
+		
 		formData.append('name', name);
 		formData.append('email', email)
 		formData.append('phone', phone);
@@ -150,9 +156,9 @@ function Enrollment() {
 		api.post(formData, config)
 		.then(response => { console.log(response); })
 		.catch(error => { console.log(error); })
-  }
+  	}
    
-  const addScientificProduction = () => {
+  	const addScientificProduction = () => {
 		setInputs({
 			...inputs, 
 			scientificProductions: [
