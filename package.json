@@ -4,8 +4,11 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.6.0",
+    "@material-ui/icons": "^4.5.1",
     "axios": "^0.19.0",
+    "jquery": "^3.4.1",
     "react": "^16.11.0",
+    "react-advanced-form": "^1.7.2",
     "react-dom": "^16.11.0",
     "react-material-ui-form-validator": "^2.0.9",
     "react-router-dom": "^5.1.2",
