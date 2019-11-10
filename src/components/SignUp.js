@@ -3,8 +3,8 @@ import React from 'react'
 import { Paper, makeStyles, Typography, Button, Grid} from '@material-ui/core'
 import { Input, Form } from './Input';
 import { constants } from '../constants/constants';
-import api, { makeLogin } from '../services/api';
-import { setUser, setToken, getToken } from '../services/auth';
+import api from '../services/api';
+import { setToken } from '../services/auth';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -31,20 +31,22 @@ const useStyles = makeStyles(theme => ({
 	}
 }))
 
-function SignIn(props) {
+function SignUp(props) {
 	const classes = useStyles();
+	const [fullname, setFullName] = React.useState('')
 	const [email, setEmail] = React.useState('')
 	const [password, setPassword] = React.useState('')
+	const [repeatPassword, setRepeatPassword] = React.useState('')
 
-	const validatePassword = (value) => {
-		return (value.length >= 6) ? true : false
-	}
+	const validatePassword = () => (password.length >= 6)
+
+	const validateRepeatPassword = () => (repeatPassword === password)
 
 	const handleSubmit = () => {
-		api.post('/sessions', {email, password}).then((res) => {
+		api.post('/users', {fullname, email, password}).then((res) => {
 			const {token} = res.data
 			setToken(token)
-
+			console.log(res.data)
 			props.history.push('/')
 		}).catch(error => {
 			console.log(error)
@@ -65,6 +67,14 @@ function SignIn(props) {
 							onSubmit={handleSubmit}>
 							<Grid item xs className={classes.gridForm}>
 								<Input 
+									label={constants.fullnameLabel}
+									stateValue={[fullname, setFullName]}
+									validators={['required']}
+									errorMessages={['Esse campo é obrigatório']}
+									/>
+							</Grid>
+							<Grid item xs className={classes.gridForm}>
+								<Input 
 									label={constants.emailLabel}
 									stateValue={[email, setEmail]}
 									validators={['required', 'isEmail']}
@@ -76,9 +86,19 @@ function SignIn(props) {
 									label={constants.passwordLabel}
 									type="password"
 									stateValue={[password, setPassword]}
-									validators={['required']}
 									validateField={validatePassword}
+									validators={['required']}
 									errorMessages={['Esse campo é obrigatório', 'Mínimo de 6 caracteres']}
+									/>
+							</Grid>
+							<Grid item xs className={classes.gridForm}>
+								<Input 
+									label={constants.repeatPasswordLabel}
+									type="password"
+									stateValue={[repeatPassword, setRepeatPassword]}
+									validators={['required']}
+									validateField={validateRepeatPassword}
+									errorMessages={['Esse campo é obrigatório', 'As senhas não estão iguais']}
 									/>
 							</Grid>
 							<Grid item xs className={classes.gridForm}>								
@@ -97,4 +117,4 @@ function SignIn(props) {
 	)
 }
 
-export default SignIn
+export default SignUp

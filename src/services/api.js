@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { getToken } from './auth'
+import { getToken, setToken, setUser } from './auth'
 import { API } from './defaultProps'
 
 const api = axios.create({
