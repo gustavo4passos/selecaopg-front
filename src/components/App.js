@@ -18,7 +18,9 @@ const theme = createMuiTheme({
 function App() {
 	return (
 		<ThemeProvider theme={theme}>
-			<Routes/>
+			<div className='main-page'>
+				<Routes/>
+			</div>
 		</ThemeProvider>
 	)
 }

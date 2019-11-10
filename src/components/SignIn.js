@@ -15,11 +15,9 @@ function SignIn() {
 	const classes = useStyles()
 
 	return (
-		<div className='login'>
-			<Paper className={classes.root}>
-				<Button color='primary' variant='contained'>Logar</Button>
-			</Paper>
-		</div>
+		<Paper className={classes.root}>
+			<Button color='primary' variant='contained'>Logar</Button>
+		</Paper>
 	)
 }
 
