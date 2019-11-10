@@ -4,6 +4,8 @@ import { makeStyles } from '@material-ui/styles'
 import { Paper, Grid, Typography, Button, FormLabel, RadioGroup, FormControlLabel, Radio, FormControl } from '@material-ui/core';
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator'
 
+import $ from 'jquery'
+
 const useStyles = makeStyles(theme => ({
 	root: {
 		width: '100%',
@@ -40,10 +42,10 @@ function Enrollment() {
 		lattesLink: '',
 		undergraduateUniversity: '',
 		enadeLink: '',
-		undergraduateTranscript: '',
-		graduateTranscript: '',
-		scientificProduction: '',
-		publications: ''
+		undergraduateTranscript: new File([], ''),
+		graduateTranscript: new File([], ''),
+		scientificProduction: new File([], ''),
+		publications: new File([], '')
 	})
 
 	const handleSubmit = (e) => {
@@ -60,6 +62,8 @@ function Enrollment() {
 	const handleInput = (key, value) => {
 		setInputs({...inputs, [key]: value})
 	}
+
+	const clickFile = (key) => $(key).click()
 
 	return (
 		<Paper className={classes.root}>
@@ -169,6 +173,42 @@ function Enrollment() {
 							onChange={(e) => handleInput('enadeLink', e.target.value)}
 							fullWidth
 						/>
+					</Grid>
+					<Grid item xs={12}>
+						<FormLabel component='p'>Histórico acadêmico de curso(s) de Pós-Graduação Strictu Sensu</FormLabel>
+						<input id='graduate-transcript' type='file' value='' onChange={e => handleInput('graduateTranscript', e.target.files[0])} hidden/>
+						<Button fullWidth={false} variant='outlined' color='primary' size='small' onClick={() => clickFile('#graduate-transcript')}>
+							Adicionar Arquivo
+						</Button>
+						{
+							inputs.graduateTranscript.size !== 0 && 
+							<Button style={{marginLeft: '5px'}} onClick={e => handleInput('graduateTranscript', new File([], '	'))}>Remover</Button>
+						}
+						<Typography variant='subtitle2'>{inputs.graduateTranscript.name}</Typography>
+					</Grid>
+					<Grid item xs={12}>
+						<FormLabel component='p'>Histórico acadêmico de curso(s) de graduação (em PDF, apenas para mestrandos)</FormLabel>
+						<input id='undergraduate-transcript' type='file' value='' onChange={e => handleInput('undergraduateTranscript', e.target.files[0])} hidden/>
+						<Button fullWidth={false} variant='outlined' color='primary' size='small' onClick={() => clickFile('#undergraduate-transcript')}>
+							Adicionar Arquivo
+						</Button>
+						{
+							inputs.undergraduateTranscript.size !== 0 && 
+							<Button style={{marginLeft: '5px'}} onClick={e => handleInput('undergraduateTranscript', new File([], '	'))}>Remover</Button>
+						}
+						<Typography variant='subtitle2'>{inputs.undergraduateTranscript.name}</Typography>
+					</Grid>
+					<Grid item xs={12}>
+						<FormLabel component='p'>Publicações em PDF listadas no currículo lattes (arquivo ZIP)</FormLabel>
+						<input id='publications' type='file' value='' onChange={e => handleInput('publications', e.target.files[0])} hidden/>
+						<Button fullWidth={false} variant='outlined' color='primary' size='small' onClick={() => clickFile('#publications')}>
+							Adicionar Arquivo
+						</Button>
+						{
+							inputs.publications.size !== 0 && 
+							<Button style={{marginLeft: '5px'}} onClick={e => handleInput('publications', new File([], '	'))}>Remover</Button>
+						}
+						<Typography variant='subtitle2'>{inputs.publications.name}</Typography>
 					</Grid>
 					<Grid item xs={12}>
 						<Button color='primary' variant='contained' type='submit'>Inscrever-se</Button>
