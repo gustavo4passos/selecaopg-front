@@ -9,8 +9,7 @@ import { setUser, setToken, getToken } from '../services/auth';
 const useStyles = makeStyles(theme => ({
 	root: {
 		width: '100%',
-		maxWidth: '700px',
-		minHeight: '600px',
+		maxWidth: '500px',
 		padding: theme.spacing(4),
 		alignItems: 'center',
 		display: 'flex'
@@ -18,12 +17,10 @@ const useStyles = makeStyles(theme => ({
 	grid: {
 		width: '100%',
 		flexDirection: 'column',
-		alignItems: 'center',
 		marginBottom: theme.spacing(5)
 		// backgroundColor: 'red',
 	},
 	gridItem: {
-		width: '50%',
 		alignItems: 'center'
 	},
 	gridForm: {
@@ -35,6 +32,7 @@ const useStyles = makeStyles(theme => ({
 
 function SignIn(props) {
 	const classes = useStyles();
+
 	const [email, setEmail] = React.useState('')
 	const [password, setPassword] = React.useState('')
 
@@ -44,9 +42,9 @@ function SignIn(props) {
 
 	const handleSubmit = () => {
 		api.post('/sessions', {email, password}).then((res) => {
-			const {token} = res.data
+			const {token, user} = res.data
 			setToken(token)
-
+			setUser(user)
 			props.history.push('/')
 		}).catch(error => {
 			console.log(error)
@@ -54,48 +52,46 @@ function SignIn(props) {
     }
 
 	return (
-		<div className='login'>
-			<Paper className={classes.root}>
-				<Grid container className={classes.grid}>
-					<Grid item xs className={classes.gridItem}>
-						<Typography variant="h5" align='center' >
-							{constants.loginTitle}
-						</Typography>
-					</Grid>
-					<Grid item xs className={classes.gridItem}>
-						<Form
-							onSubmit={handleSubmit}>
-							<Grid item xs className={classes.gridForm}>
-								<Input 
-									label={constants.emailLabel}
-									stateValue={[email, setEmail]}
-									validators={['required', 'isEmail']}
-									errorMessages={['Esse campo é obrigatório', 'Isso não parece um email']}
-									/>
-							</Grid>
-							<Grid item xs className={classes.gridForm}>
-								<Input 
-									label={constants.passwordLabel}
-									type="password"
-									stateValue={[password, setPassword]}
-									validators={['required']}
-									validateField={validatePassword}
-									errorMessages={['Esse campo é obrigatório', 'Mínimo de 6 caracteres']}
-									/>
-							</Grid>
-							<Grid item xs className={classes.gridForm}>								
-								<Button
-									fullWidth 
-									color='primary'
-									variant='contained'
-									type='submit'
-									>{constants.btnLogin}</Button>
-							</Grid>
-						</Form>
-					</Grid>
+		<Paper className={classes.root}>
+			<Grid container className={classes.grid}>
+				<Grid item xs className={classes.gridItem}>
+					<Typography variant="h5" align='center' >
+						{constants.loginTitle}
+					</Typography>
 				</Grid>
-			</Paper>
-		</div>
+				<Grid item xs className={classes.gridItem}>
+					<Form
+						onSubmit={handleSubmit}>
+						<Grid item xs className={classes.gridForm}>
+							<Input 
+								label={constants.emailLabel}
+								stateValue={[email, setEmail]}
+								validators={['required', 'isEmail']}
+								errorMessages={['Esse campo é obrigatório', 'Isso não parece um email']}
+								/>
+						</Grid>
+						<Grid item xs className={classes.gridForm}>
+							<Input 
+								label={constants.passwordLabel}
+								type="password"
+								stateValue={[password, setPassword]}
+								validators={['required']}
+								validateField={validatePassword}
+								errorMessages={['Esse campo é obrigatório', 'Mínimo de 6 caracteres']}
+								/>
+						</Grid>
+						<Grid item xs className={classes.gridForm}>								
+							<Button
+								fullWidth 
+								color='primary'
+								variant='contained'
+								type='submit'
+								>{constants.btnLogin}</Button>
+						</Grid>
+					</Form>
+				</Grid>
+			</Grid>
+		</Paper>
 	)
 }
 

@@ -4,9 +4,9 @@ import { makeStyles } from '@material-ui/styles'
 import { Paper, Grid, Typography, 
 	Button, FormLabel, RadioGroup, 
 	FormControlLabel, Radio, FormControl, 
-	MenuItem, IconButton, Fab, ListSubheader, Checkbox 
+	MenuItem, IconButton, Fab, ListSubheader, Checkbox, Snackbar, CircularProgress, SnackbarContent 
 } from '@material-ui/core';
-import { Add, Remove } from '@material-ui/icons'
+import { Add, Remove, Close } from '@material-ui/icons'
 import { ValidatorForm, TextValidator, SelectValidator } from 'react-material-ui-form-validator'
 
 import $ from 'jquery'
@@ -14,6 +14,7 @@ import $ from 'jquery'
 import api from '../services/api'
 
 import logoUFBA from '../assets/imgs/logoufba.png'
+import { getUser } from '../services/auth';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -70,6 +71,15 @@ const useStyles = makeStyles(theme => ({
 		border: '1px solid #ddd',
 		borderRadius: '1em',
 		padding: '1em 1em 2em !important'
+	},
+	snackError: {
+		backgroundColor: 'red',
+		color: 'white'
+	},
+	snackMessage: {
+		display: 'flex',
+		alignItems: 'center',
+		color: 'white'
 	}
 }))
 
@@ -125,7 +135,7 @@ const tables = {
 const arrayQualis = Object.keys(tables.Categoria.Qualis)
 const arrayOutros = Object.keys(tables.Categoria.Outros)
 
-function Enrollment() {
+function Enrollment(props) {
 	const classes = useStyles()
 
 	const [inputs, setInputs] = useState({
@@ -152,6 +162,13 @@ function Enrollment() {
 		undergraduateTranscript: new File([], ''),
 		graduateTranscript: new File([], ''),
 	})
+
+	const [snackError, setSnackError] = useState({
+		error: false,
+		message: ''
+	})
+
+	const [isRegistering, setRegistering] = useState(false)
   
   	const { 
 		name, email, phone, degree,
@@ -163,18 +180,18 @@ function Enrollment() {
 		undergraduateTranscript, graduateTranscript, 
 	} = inputs
 
-	useEffect(() => {
-		setInputs({
-			...inputs,
-			name: 'a',
-			email: 'igoor1205@gmail.com',
-			phone: '71',
-			degree: 'doctorate',
-			noteType: 'cr',
-			noteRG: '9',
+	// useEffect(() => {
+	// 	setInputs({
+	// 		...inputs,
+	// 		name: 'a',
+	// 		email: 'igoor1205@gmail.com',
+	// 		phone: '71',
+	// 		degree: 'doctorate',
+	// 		noteType: 'cr',
+	// 		noteRG: '9',
 
-		})
-	}, [])
+	// 	})
+	// }, [])
 
 	const validateFile = (file, types, size) => {
 		if ( !(types.indexOf(file.name.split('.')[1]) != -1) ) {
@@ -187,6 +204,13 @@ function Enrollment() {
 	}
 
 	const handleSubmit = (e) => {
+		setRegistering(true)
+
+		const showError = (message) => {
+			setSnackError({error: true, message})
+			setRegistering(false)
+		}
+
 		let formData = new FormData()
 		let publications = []
 		let score = 0
@@ -226,8 +250,8 @@ function Enrollment() {
 			else if(capes < 4){
 				ponderada = Capes[capes];
 			}
-
-			RG = Math.min(10.0, ( 1.67 * (ira - mediaEnade)/devEnade ) + 5.00) * noteArea;
+			console.log(ira, mediaEnade, devEnade, noteArea)
+			RG = Math.min(10.0, ((ira - mediaEnade)/devEnade)*1.67 + 5.00) * Number(noteArea);
 
 			CRPG = noteCRPG * ponderada;
 		}
@@ -240,25 +264,31 @@ function Enrollment() {
 		}
 
 		let countOutros = [ 0, 0, 0, 0, 0, 0];
+		
+		for(let i in scientificProductions){
+			let producao = scientificProductions[i]
+			let publication = {}
 
-		for(let producao of scientificProductions){
-
-			let formPublication = new FormData();
-
-			formPublication.append('category', producao.category);
+			publication.category = producao.category
 
 			if(producao.publicationMode == 'link'){
-				formPublication.append('link', producao.publicationLink);
+				publication.link = producao.publicationLink
+				// formPublication.append('link', producao.publicationLink);
 			}
 			else{
-				if(validateFile(producao.publicationFile, ['pdf'], MAX_FILE_SIZE))
-					formPublication.append('file', producao.publicationFile);
+				if(validateFile(producao.publicationFile, ['pdf'], MAX_FILE_SIZE)) {
+					publication.file = 'publication'+i
+					formData.append(publication.file, producao.publicationFile);
+				} else {
+					showError('Limite máximo de 15 MB.')
+				}
+					
 			}
 			
 			let indexQualis = arrayQualis.indexOf(producao.category);
 			if(indexQualis != -1){
 				qualis += Categoria.Qualis[producao.category];
-				formPublication.append('score', Categoria.Qualis[producao.category]);
+				publication.score = Categoria.Qualis[producao.category]
 			}
 			else{
 				let indexOutros = arrayOutros.indexOf(producao.category);
@@ -269,20 +299,24 @@ function Enrollment() {
 						outros = Math.min(5.0, outros + Categoria.Outros[producao.category]);
 						
 					}
-					formPublication.append('score', Categoria.Outros[producao.category]);
+					publication.score = Categoria.Outros[producao.category]
 				}
 			}
 
-			publications.push(formPublication);
+			publications.push(publication);
+			formData.append('publications', JSON.stringify(publications))
 		}
 		console.log('qualis', qualis)
 		console.log('outros', outros)
+
 		PI = Math.min(qualis + outros, 10.0);
+
 		console.log('RG', RG)
 		console.log('CRPG', CRPG)
 		console.log('PI', PI)
-		score = RG + CRPG + PI;
 
+		score = RG + CRPG + PI;
+		console.log('score', score)
 		formData.append('score', score);
 
 		if(!validateFile(undergraduateTranscript, ['pdf'], MAX_FILE_SIZE)) return
@@ -291,6 +325,10 @@ function Enrollment() {
 		if(!validateFile(graduateTranscript, ['pdf'], MAX_FILE_SIZE)) return
 		formData.append('graduate_transcript', graduateTranscript);
 
+		let user = getUser()
+
+		formData.append('user_id', user.id)
+		formData.append('selection_id', 1) // props.selection.id
 		const config = {
 			headers: { 'content-type': 'multipart/form-data' }
 		}
@@ -445,7 +483,7 @@ function Enrollment() {
 						/>
 					</Grid>
 					<Grid item xs={12}>
-						<FormControl color='primary'>
+						<FormControl required color='primary'>
 							<FormLabel component='p'>Curso do Candidato(a) *</FormLabel>
 							<RadioGroup name='degree' value={degree} onChange={e => handleInput('degree', e.target.value)}>
 								<FormControlLabel value='masters' label='Mestrado' control={<Radio color='primary'/>}/>
@@ -483,6 +521,8 @@ function Enrollment() {
 										label='Conceito *'
 										value={noteRG}
 										onChange={(e) => handleInput('noteRG', e.target.value)}
+										validators={['required']}
+										errorMessages={['Campo obrigatório']}
 										fullWidth
 									>	
 										<MenuItem value='A'>A</MenuItem>
@@ -501,6 +541,8 @@ function Enrollment() {
 										type='number'
 										value={noteRG}
 										onChange={(e) => handleInput('noteRG', e.target.value)}
+										validators={['required']}
+										errorMessages={['Campo obrigatório']}
 										fullWidth
 									/>
 								</Grid>
@@ -510,6 +552,8 @@ function Enrollment() {
 									label='ENADE do seu Curso de Graduação *'
 									value={enade}
 									onChange={(e) => handleInput('enade', e.target.value)}
+									validators={['required']}
+									errorMessages={['Campo obrigatório']}
 									fullWidth
 								>	
 									<MenuItem value='1'>1</MenuItem>
@@ -524,6 +568,8 @@ function Enrollment() {
 									label='Área do seu Curso de Graduação *'
 									value={area}
 									onChange={(e) => handleInput('area', e.target.value)}
+									validators={['required']}
+									errorMessages={['Campo obrigatório']}
 									fullWidth
 								>	
 									<MenuItem value='computacao'>
@@ -546,6 +592,8 @@ function Enrollment() {
 							type='number'
 							value={noteCRPG}
 							onChange={(e) => handleInput('noteCRPG', e.target.value)}
+							validators={['required']}
+							errorMessages={['Campo obrigatório']}
 							fullWidth
 						/>
 					</Grid>
@@ -556,6 +604,8 @@ function Enrollment() {
 								label='Conceito CAPES *'
 								value={capes}
 								onChange={(e) => handleInput('capes', e.target.value)}
+								validators={['required']}
+								errorMessages={['Campo obrigatório']}
 								fullWidth
 							>	
 								<MenuItem value='2'>2</MenuItem>
@@ -600,9 +650,11 @@ function Enrollment() {
 									</Grid>
 									<Grid item xs={12} sm={8}>
 										<SelectValidator
-											label='Categoria'
+											label='Categoria *'
 											value={prod.category}
 											onChange={(e) => handleScientifProductions(i, 'category', e.target.value)}
+											validators={['required']}
+											errorMessages={['Campo obrigatório']}
 											fullWidth
 										>	
 											<ListSubheader>Artigos Completos</ListSubheader>
@@ -636,9 +688,11 @@ function Enrollment() {
 										prod.publicationMode === 'link' &&
 										<Grid item xs={12}>
 											<TextValidator
-												label='Link para a Publicação'
+												label='Link para a Publicação *'
 												value={prod.publicationLink}
 												onChange={(e) => handleScientifProductions(i, 'publicationLink', e.target.value)}
+												validators={['required']}
+												errorMessages={['Campo obrigatório']}
 												fullWidth
 											/>
 										</Grid>
@@ -646,7 +700,7 @@ function Enrollment() {
 									{
 										prod.publicationMode === 'file' &&
 										<Grid item xs={12}>
-											<FormLabel component='p'>Arquivo Publicação</FormLabel>
+											<FormLabel component='p'>Arquivo Publicação *</FormLabel>
 											<input id='publication-file' type='file' value='' onChange={e => handleScientifProductions(i, 'publicationFile', e.target.files[0])} hidden/>
 											<Button fullWidth={false} variant='outlined' color='primary' size='small' onClick={() => clickFile('#publication-file')}>
 												Adicionar Arquivo
@@ -707,11 +761,35 @@ function Enrollment() {
 					</Grid>
 					
 					<Grid item xs={12}>
-						<Button color='primary' variant='contained' type='submit'>Inscrever-se</Button>
+						<Button color='primary' variant='contained' type='submit'>
+							{isRegistering ? <CircularProgress color='default' size={24}/> : "Inscrever-se"}
+						</Button>
 					</Grid>
 				</Grid>
 			</ValidatorForm>
-
+			<Snackbar 
+				anchorOrigin={{
+					vertical: 'bottom',
+					horizontal: 'right',
+				}}
+				open={snackError.error} 
+				autoHideDuration={6000}
+        		onClose={() => setSnackError({error: false, message: ''})}
+			>
+				<SnackbarContent
+					className={classes.snackError} 
+					message={
+						<span className={classes.snackMessage}>
+							{snackError.error && snackError.message}
+						</span>
+					}
+					action={[
+						<IconButton>
+							<Close style={{color: 'white'}}/>
+						</IconButton>
+					]}
+				/>	
+			</Snackbar>
 		</Paper>
 	)
 }
