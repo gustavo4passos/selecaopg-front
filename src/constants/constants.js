@@ -4,7 +4,7 @@ export const constants = {
     passwordLabel: 'Senha',
     repeatPasswordLabel: 'Confirme a senha',
     btnLogin: 'Logar',
-    btnSignup: 'Pronto',
+    btnSignup: 'Cadastrar',
     signupTitle: 'Registrar',
     loginTitle: 'Entrar',
 }
