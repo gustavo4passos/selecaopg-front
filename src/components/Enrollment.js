@@ -17,6 +17,8 @@ import api from '../services/api'
 
 import logoUFBA from '../assets/imgs/logoufba.png'
 import { getUser } from '../services/auth';
+import { SnackbarContentWrapper } from './SnackBar';
+import { constants } from '../constants/constants';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -168,10 +170,7 @@ function Enrollment({selectionId, ...props}) {
 		graduateTranscript: {value: new File([], ''), error: null},
 	})
 
-	const [snackError, setSnackError] = useState({
-		error: false,
-		message: ''
-	})
+	const [openSnackBar, setOpenSnackBar] = React.useState({error: false, message: ''});
 
 	const [isRegistering, setRegistering] = useState(false)
   
@@ -243,7 +242,7 @@ function Enrollment({selectionId, ...props}) {
 		setRegistering(true)
 
 		const showError = (message) => {
-			setSnackError({error: true, message})
+			setOpenSnackBar({error: true, message})
 			setRegistering(false)
 		}
 
@@ -316,7 +315,7 @@ function Enrollment({selectionId, ...props}) {
 					publication.file = 'publication'+i
 					formData.append(publication.file, producao.publicationFile.value);
 				} else {
-					showError('Limite máximo de 15 MB.')
+					showError(constants.errorFileSize)
 				}
 					
 			}
@@ -372,7 +371,7 @@ function Enrollment({selectionId, ...props}) {
 		const config = {
 			headers: { 'content-type': 'multipart/form-data' }
 		}
-
+		
 		api.post('/enrollments', formData, config)
 		.then(response => { 
 			console.log(response)
@@ -380,6 +379,7 @@ function Enrollment({selectionId, ...props}) {
 		})
 		.catch(error => { 
 			console.log(error)
+      showError(constants.errorServer)
 			setRegistering(false)
 		})
   	}
@@ -879,28 +879,20 @@ function Enrollment({selectionId, ...props}) {
 					</Grid>
 				</Grid>
 			</ValidatorForm>
-			<Snackbar 
+			<Snackbar
 				anchorOrigin={{
 					vertical: 'bottom',
-					horizontal: 'right',
+					horizontal: 'left',
 				}}
-				open={snackError.error} 
+				open={openSnackBar.error}
 				autoHideDuration={6000}
-        		onClose={() => setSnackError({error: false, message: ''})}
+				onClose={() => setOpenSnackBar({error: false, message: ''})}
 			>
-				<SnackbarContent
-					className={classes.snackError} 
-					message={
-						<span className={classes.snackMessage}>
-							{snackError.error && snackError.message}
-						</span>
-					}
-					action={[
-						<IconButton>
-							<Close style={{color: 'white'}}/>
-						</IconButton>
-					]}
-				/>	
+				<SnackbarContentWrapper
+					onClose={() => setOpenSnackBar({error: false, message: ''})}
+					variant="error"
+					message={openSnackBar.message}
+				/>
 			</Snackbar>
 		</Paper>
 	)
