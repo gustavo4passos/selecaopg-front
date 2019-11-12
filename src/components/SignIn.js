@@ -58,6 +58,8 @@ function SignIn(props) {
 		setOpenSnackBar(false);
 	};
 
+	const handleSignUp = () => props.history.push('/cadastrar')
+
 	return (
 		<Paper className={classes.root}>
 			<Grid container className={classes.grid}>
@@ -93,6 +95,14 @@ function SignIn(props) {
 								variant='contained'
 								type='submit'
 								>{constants.btnLogin}</Button>
+						</Grid>
+						<Grid item xs className={classes.gridForm}>								
+							<Button
+								fullWidth 
+								color='primary'
+								variant='outlined'
+								onClick={handleSignUp}
+								>{constants.btnGoToSignUp}</Button>
 						</Grid>
 					</Form>
 				</Grid>
