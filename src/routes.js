@@ -14,7 +14,7 @@ const Routes = () => ((
         <Switch>
             <PublicRoute path='/entrar' component={SignIn} restricted={true}/>     
             <PublicRoute path='/cadastrar' component={SignUp} restricted={true}/>
-            <PrivateRoute path='/' component={Selection}/>
+            <PrivateRoute path='/inscricao' component={Selection}/>
         </Switch>
     </Router>
 ))

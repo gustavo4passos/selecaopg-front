@@ -4,12 +4,14 @@ import { makeStyles } from '@material-ui/styles'
 import { Paper, Grid, Typography, 
 	Button, FormLabel, RadioGroup, 
 	FormControlLabel, Radio, FormControl, 
-	MenuItem, IconButton, Fab, ListSubheader, Checkbox, Snackbar, CircularProgress, SnackbarContent 
+	MenuItem, IconButton, Fab, ListSubheader, Checkbox, Snackbar, CircularProgress, SnackbarContent, TextField, FormHelperText 
 } from '@material-ui/core';
 import { Add, Remove, Close } from '@material-ui/icons'
 import { ValidatorForm, TextValidator, SelectValidator } from 'react-material-ui-form-validator'
 
 import $ from 'jquery'
+import Inputmask from "inputmask";
+import validator from 'validator'
 
 import api from '../services/api'
 
@@ -21,7 +23,10 @@ const useStyles = makeStyles(theme => ({
 		width: '100%',
 		maxWidth: '1000px',
 		minHeight: '90vh',
-		padding: theme.spacing(4)
+		padding: theme.spacing(4),
+		'& .MuiFormLabel-root': {
+			marginTop: 0
+		}
 	},
 	header: {
 		display: 'flex',
@@ -135,7 +140,7 @@ const tables = {
 const arrayQualis = Object.keys(tables.Categoria.Qualis)
 const arrayOutros = Object.keys(tables.Categoria.Outros)
 
-function Enrollment(props) {
+function Enrollment({selectionId, ...props}) {
 	const classes = useStyles()
 
 	const [inputs, setInputs] = useState({
@@ -159,8 +164,8 @@ function Enrollment(props) {
 		capes: '',
 		scientificProductions: [],
 
-		undergraduateTranscript: new File([], ''),
-		graduateTranscript: new File([], ''),
+		undergraduateTranscript: {value: new File([], ''), error: null},
+		graduateTranscript: {value: new File([], ''), error: null},
 	})
 
 	const [snackError, setSnackError] = useState({
@@ -180,30 +185,61 @@ function Enrollment(props) {
 		undergraduateTranscript, graduateTranscript, 
 	} = inputs
 
-	// useEffect(() => {
-	// 	setInputs({
-	// 		...inputs,
-	// 		name: 'a',
-	// 		email: 'igoor1205@gmail.com',
-	// 		phone: '71',
-	// 		degree: 'doctorate',
-	// 		noteType: 'cr',
-	// 		noteRG: '9',
+	useEffect(() => {
+		// setInputs({
+		// 	...inputs,
+		// 	name: 'a',
+		// 	email: 'igoor1205@gmail.com',
+		// 	phone: '71',
+		// 	degree: 'doctorate',
+		// 	noteType: 'cr',
+		// 	noteRG: '9',
 
-	// 	})
-	// }, [])
+		// })
+
+		ValidatorForm.addValidationRule('isURL', (value) => {
+			return value.length == 0 || validator.isURL(value)
+		})
+		ValidatorForm.addValidationRule('isAlpha', (value) => {
+			return validator.isAlpha(value.replace(/ /g, ''), 'pt-BR')
+		})
+
+		ValidatorForm.addValidationRule('isNote', (value) => {
+			return value >= 0 && value <= 10
+		})
+		Inputmask('(99) 99999-9999').mask('#phone-input')
+		Inputmask('9999.9').mask('#semester-input')
+		// Inputmask('[9[,99]]|[1[0][,00]]').mask('#note-crpg-input')
+		
+	}, [])
+
+	useEffect(() => {
+
+	})
 
 	const validateFile = (file, types, size) => {
-		if ( !(types.indexOf(file.name.split('.')[1]) != -1) ) {
-			return false;
+		let sp = file.name.split('.')
+
+		if ( !(types.indexOf(sp[sp.length-1]) != -1) ) {
+			return 'type';
 		}
 		if ( file.size > size ){
-			return false;
+			return 'size';
 		}
 		return true;
 	}
 
 	const handleSubmit = (e) => {
+		for (let i in scientificProductions) {
+			let prod = scientificProductions[i]
+
+			if (prod.publicationMode === 'file' && prod.publicationFile.value.name === '') {
+				scientificProductions[i].publicationFile = {...prod.publicationFile, error: 'Campo obrigatório'} 
+				setInputs({...inputs, scientificProductions: [...scientificProductions]})
+				return
+			}
+		}
+
 		setRegistering(true)
 
 		const showError = (message) => {
@@ -276,9 +312,9 @@ function Enrollment(props) {
 				// formPublication.append('link', producao.publicationLink);
 			}
 			else{
-				if(validateFile(producao.publicationFile, ['pdf'], MAX_FILE_SIZE)) {
+				if(validateFile(producao.publicationFile.value, ['pdf'], MAX_FILE_SIZE)) {
 					publication.file = 'publication'+i
-					formData.append(publication.file, producao.publicationFile);
+					formData.append(publication.file, producao.publicationFile.value);
 				} else {
 					showError('Limite máximo de 15 MB.')
 				}
@@ -304,8 +340,9 @@ function Enrollment(props) {
 			}
 
 			publications.push(publication);
-			formData.append('publications', JSON.stringify(publications))
 		}
+		console.log('publications', publications)
+		formData.append('publications', JSON.stringify(publications))
 		console.log('qualis', qualis)
 		console.log('outros', outros)
 
@@ -319,23 +356,32 @@ function Enrollment(props) {
 		console.log('score', score)
 		formData.append('score', score);
 
-		if(!validateFile(undergraduateTranscript, ['pdf'], MAX_FILE_SIZE)) return
-		formData.append('undergraduate_transcript', undergraduateTranscript);
+		if(undergraduateTranscript.value.name !== '') {	
+			formData.append('undergraduate_transcript', undergraduateTranscript.value);
+		}
 		
-		if(!validateFile(graduateTranscript, ['pdf'], MAX_FILE_SIZE)) return
-		formData.append('graduate_transcript', graduateTranscript);
+		if(graduateTranscript.value.name !== '') {
+			formData.append('graduate_transcript', graduateTranscript.value);
+		}
 
 		let user = getUser()
 
 		formData.append('user_id', user.id)
-		formData.append('selection_id', 1) // props.selection.id
+		formData.append('selection_id', selectionId) // props.selection.id
+
 		const config = {
 			headers: { 'content-type': 'multipart/form-data' }
 		}
 
 		api.post('/enrollments', formData, config)
-		.then(response => { console.log(response); })
-		.catch(error => { console.log(error); })
+		.then(response => { 
+			console.log(response)
+			setRegistering(false)
+		})
+		.catch(error => { 
+			console.log(error)
+			setRegistering(false)
+		})
   	}
    
   	const addScientificProduction = () => {
@@ -347,7 +393,7 @@ function Enrollment(props) {
 					category: '',
 					publicationMode: 'link',
 					publicationLink: '',
-					publicationFile: new File([], ''),
+					publicationFile: {value: new File([], ''), error: null},
 					proceedingsLink: '',
 					eventLink: '',
 				}
@@ -366,12 +412,41 @@ function Enrollment(props) {
 	}
 
 	const handleInput = (key, value) => {
-		setInputs({...inputs, [key]: value})
+		console.log('key', value)
+
+		if (key === 'noteCRPG' || key === 'noteRG') {
+			if (Number(value) != value) return
+		} 
+
+		if (key === 'undergraduateTranscript' || key === 'graduateTranscript') {
+			const validate = validateFile(value, ['pdf'], MAX_FILE_SIZE)
+
+			if (validate === 'type') {
+				setInputs({...inputs, [key]: {value: new File([], ''), error: 'Tipo incorreto, somente PDF'}})
+			} else if (validate === 'size') {
+				setInputs({...inputs, [key]: {value: new File([], ''), error: 'Tamanho máximo de 15 MB excedido'}})
+			} else setInputs({...inputs, [key]: {value, error: null}})
+		} else setInputs({...inputs, [key]: value})
 	}
 
 	const handleScientifProductions = (num, key, value) => {
-		scientificProductions[num][key] = value
-		setInputs({...inputs, scientificProductions: [...scientificProductions]})
+		console.log(num, key, value)
+		if (key === 'publicationFile') {
+			const validate = validateFile(value, ['pdf'], MAX_FILE_SIZE)
+
+			if (validate === 'type') {
+				scientificProductions[num][key] = {value: new File([], ''), error: 'Tipo incorreto, somente PDF'}
+			} else if (validate === 'size') {
+				scientificProductions[num][key] = {value: new File([], ''), error: 'Tamanho máximo de 15 MB excedido'}
+			} else {
+				scientificProductions[num][key] = {value, error: null}
+			}
+			setInputs({...inputs, scientificProductions: [...scientificProductions]})
+		} else {
+			scientificProductions[num][key] = value
+			setInputs({...inputs, scientificProductions: [...scientificProductions]})
+		}
+
 	}
 
 	const clickFile = (key) => $(key).click()
@@ -396,17 +471,21 @@ function Enrollment(props) {
 					</Grid>
 					<Grid item xs={12}>
 						<TextValidator
+							id='name-input'
+							variant='outlined'
 							label='Nome Completo *'
 							name='name'
 							value={inputs.name}
 							onChange={(e) => handleInput('name', e.target.value)}
-							validators={['required']}
-							errorMessages={['Campo obrigatório']}
+							validators={['required', 'isAlpha']}
+							errorMessages={['Campo obrigatório', 'Caracteres inválidos']}
 							fullWidth
 						/>
 					</Grid>
 					<Grid item xs={12} sm={8}>
 						<TextValidator
+							id='email-input'
+							variant='outlined'
 							label='Email *'
 							name='email'
 							value={inputs.email}
@@ -418,6 +497,9 @@ function Enrollment(props) {
 					</Grid>
 					<Grid item xs={12} sm={4}>
 						<TextValidator
+							id='phone-input'
+							type='text'
+							variant='outlined'
 							label='Celular *'
 							name='phone'
 							value={inputs.phone}
@@ -430,6 +512,7 @@ function Enrollment(props) {
 					
 					<Grid item xs={12} sm={8}>
 						<TextValidator
+							variant='outlined'
 							label='Nome do Orientador *'
 							name='advisor-name'
 							value={inputs.advisorName}
@@ -441,6 +524,8 @@ function Enrollment(props) {
 					</Grid>
 					<Grid item xs={12} sm={4}>
 						<TextValidator
+							id='semester-input'
+							variant='outlined'
 							label='Semestre de Entrada *'
 							name='entry-semester'
 							value={inputs.entrySemester}
@@ -452,6 +537,7 @@ function Enrollment(props) {
 					</Grid>
 					<Grid item xs={12}>
 						<TextValidator
+							variant='outlined'
 							label='Universidade em que cursou a graduação *'
 							name='undergraduate-university'
 							value={inputs.undergraduateUniversity}
@@ -464,26 +550,30 @@ function Enrollment(props) {
 					
 					<Grid item xs={12}>
 						<TextValidator
+							variant='outlined'
 							label='Link para CV Lattes *'
 							name='lattes-link'
 							value={inputs.lattesLink}
 							onChange={(e) => handleInput('lattesLink', e.target.value)}
-							validators={['required']}
-							errorMessages={['Campo obrigatório']}
+							validators={['required', 'isURL']}
+							errorMessages={['Campo obrigatório', 'URL inválida']}
 							fullWidth
 						/>
 					</Grid>
 					<Grid item xs={12}>
 						<TextValidator
+							variant='outlined'
 							label='Link para ENADE'
 							name='enade-link'
 							value={inputs.enadeLink}
 							onChange={(e) => handleInput('enadeLink', e.target.value)}
+							validators={['isURL']}
+							errorMessages={['URL inválida']}
 							fullWidth
 						/>
 					</Grid>
 					<Grid item xs={12}>
-						<FormControl required color='primary'>
+						<FormControl color='primary'>
 							<FormLabel component='p'>Curso do Candidato(a) *</FormLabel>
 							<RadioGroup name='degree' value={degree} onChange={e => handleInput('degree', e.target.value)}>
 								<FormControlLabel value='masters' label='Mestrado' control={<Radio color='primary'/>}/>
@@ -518,6 +608,7 @@ function Enrollment(props) {
 
 								<Grid item xs={12} sm={3}>
 									<SelectValidator
+										variant='outlined'
 										label='Conceito *'
 										value={noteRG}
 										onChange={(e) => handleInput('noteRG', e.target.value)}
@@ -537,8 +628,9 @@ function Enrollment(props) {
 								noteType === 'cr' &&
 								<Grid item xs={12} sm={3}>
 									<TextValidator
+										id='note-rg-input'
+										variant='outlined'
 										label='Nota *'
-										type='number'
 										value={noteRG}
 										onChange={(e) => handleInput('noteRG', e.target.value)}
 										validators={['required']}
@@ -549,6 +641,7 @@ function Enrollment(props) {
 							}
 							<Grid item xs={12} sm={6} alignItems='flex-start' alignContent='flex-start'>
 								<SelectValidator
+									variant='outlined'
 									label='ENADE do seu Curso de Graduação *'
 									value={enade}
 									onChange={(e) => handleInput('enade', e.target.value)}
@@ -565,6 +658,7 @@ function Enrollment(props) {
 							</Grid> 
 							<Grid item xs={12} alignItems='flex-start' alignContent='flex-start'>
 								<SelectValidator
+									variant='outlined'
 									label='Área do seu Curso de Graduação *'
 									value={area}
 									onChange={(e) => handleInput('area', e.target.value)}
@@ -588,12 +682,13 @@ function Enrollment(props) {
 					</Grid>
 					<Grid item xs={12} sm={3}>
 						<TextValidator
+							id='note-crpg-input'
+							variant='outlined'
 							label='Nota *'
-							type='number'
 							value={noteCRPG}
 							onChange={(e) => handleInput('noteCRPG', e.target.value)}
-							validators={['required']}
-							errorMessages={['Campo obrigatório']}
+							validators={['required', 'isNote']}
+							errorMessages={['Campo obrigatório', 'Nota entre 0 e 10']}
 							fullWidth
 						/>
 					</Grid>
@@ -601,6 +696,7 @@ function Enrollment(props) {
 						!mastersFreshman &&
 						<Grid item xs={12} sm={3}>
 							<SelectValidator
+								variant='outlined'
 								label='Conceito CAPES *'
 								value={capes}
 								onChange={(e) => handleInput('capes', e.target.value)}
@@ -617,7 +713,7 @@ function Enrollment(props) {
 							</SelectValidator>	
 						</Grid>
 					}
-					<Grid item xs={12} style={{marginTop: '1em'}}>
+					<Grid item xs={12}>
 						<Grid container spacing={1} alignItems='center'>
 							<Grid item xs={true}>
 								<FormLabel>Produções Intelectuais</FormLabel>
@@ -650,6 +746,7 @@ function Enrollment(props) {
 									</Grid>
 									<Grid item xs={12} sm={8}>
 										<SelectValidator
+											variant='outlined'
 											label='Categoria *'
 											value={prod.category}
 											onChange={(e) => handleScientifProductions(i, 'category', e.target.value)}
@@ -688,11 +785,12 @@ function Enrollment(props) {
 										prod.publicationMode === 'link' &&
 										<Grid item xs={12}>
 											<TextValidator
+												variant='outlined'
 												label='Link para a Publicação *'
 												value={prod.publicationLink}
 												onChange={(e) => handleScientifProductions(i, 'publicationLink', e.target.value)}
-												validators={['required']}
-												errorMessages={['Campo obrigatório']}
+												validators={['required', 'isURL']}
+												errorMessages={['Campo obrigatório', 'URL incorreta']}
 												fullWidth
 											/>
 										</Grid>
@@ -701,21 +799,26 @@ function Enrollment(props) {
 										prod.publicationMode === 'file' &&
 										<Grid item xs={12}>
 											<FormLabel component='p'>Arquivo Publicação *</FormLabel>
-											<input id='publication-file' type='file' value='' onChange={e => handleScientifProductions(i, 'publicationFile', e.target.files[0])} hidden/>
-											<Button fullWidth={false} variant='outlined' color='primary' size='small' onClick={() => clickFile('#publication-file')}>
+											<input id={'publication-file'+i} type='file' value='' onChange={e => handleScientifProductions(i, 'publicationFile', e.target.files[0])} hidden/>
+											<Button fullWidth={false} variant='outlined' color='primary' size='small' onClick={() => clickFile('#publication-file'+i)}>
 												Adicionar Arquivo
 											</Button>
 											{
-												prod.publicationFile.size !== 0 && 
+												prod.publicationFile.value.size !== 0 && 
 												<Button style={{marginLeft: '5px'}} onClick={e => handleScientifProductions(i, 'publicationFile', new File([], ''))}>
 													Remover
 												</Button>
 											}
-											<Typography variant='subtitle2'>{prod.publicationFile.name}</Typography>
+											<Typography variant='subtitle2'>{prod.publicationFile.value.name}</Typography>
+											{
+												prod.publicationFile.error && 
+												<FormHelperText error>{prod.publicationFile.error}</FormHelperText>
+											}
 										</Grid>
 									}
 									<Grid item xs={12}>
 										<TextValidator
+											variant='outlined'
 											label='Link para os Anais'
 											value={prod.proceedingsLink}
 											onChange={(e) => handleScientifProductions(i, 'proceedingsLink', e.target.value)}
@@ -724,6 +827,7 @@ function Enrollment(props) {
 									</Grid>
 									<Grid item xs={12}>
 										<TextValidator
+											variant='outlined'
 											label='Link do Evento'
 											value={prod.eventLink}
 											onChange={(e) => handleScientifProductions(i, 'eventLink', e.target.value)}
@@ -742,10 +846,14 @@ function Enrollment(props) {
 							Adicionar Arquivo
 						</Button>
 						{
-							inputs.graduateTranscript.size !== 0 && 
+							graduateTranscript.value.size !== 0 && 
 							<Button style={{marginLeft: '5px'}} onClick={e => handleInput('graduateTranscript', new File([], '	'))}>Remover</Button>
 						}
-						<Typography variant='subtitle2'>{inputs.graduateTranscript.name}</Typography>
+						<Typography variant='subtitle2'>{graduateTranscript.value.name}</Typography>
+						{
+							graduateTranscript.error && 
+							<FormHelperText error>{graduateTranscript.error}</FormHelperText>
+						}
 					</Grid>
 					<Grid item xs={12}>
 						<FormLabel component='p'>Histórico acadêmico de curso(s) de graduação (em PDF, apenas para mestrandos)</FormLabel>
@@ -754,14 +862,18 @@ function Enrollment(props) {
 							Adicionar Arquivo
 						</Button>
 						{
-							inputs.undergraduateTranscript.size !== 0 && 
+							undergraduateTranscript.value.size !== 0 && 
 							<Button style={{marginLeft: '5px'}} onClick={e => handleInput('undergraduateTranscript', new File([], '	'))}>Remover</Button>
 						}
-						<Typography variant='subtitle2'>{inputs.undergraduateTranscript.name}</Typography>
+						<Typography variant='subtitle2'>{undergraduateTranscript.value.name}</Typography>
+						{
+							undergraduateTranscript.error && 
+							<FormHelperText error>{undergraduateTranscript.error}</FormHelperText>
+						}
 					</Grid>
 					
 					<Grid item xs={12}>
-						<Button color='primary' variant='contained' type='submit'>
+						<Button disabled={degree === ''} color='primary' variant='contained' type='submit'>
 							{isRegistering ? <CircularProgress color='default' size={24}/> : "Inscrever-se"}
 						</Button>
 					</Grid>
