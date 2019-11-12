@@ -1,10 +1,11 @@
 import React from 'react'
 
-import { Paper, makeStyles, Typography, Button, Grid} from '@material-ui/core'
+import { Paper, makeStyles, Typography, Button, Grid, Snackbar} from '@material-ui/core'
 import { Input, Form } from './Input';
 import { constants } from '../constants/constants';
 import api, { makeLogin } from '../services/api';
 import { setUser, setToken, getToken } from '../services/auth';
+import { MySnackbarContentWrapper } from './SnackBar';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -18,7 +19,6 @@ const useStyles = makeStyles(theme => ({
 		width: '100%',
 		flexDirection: 'column',
 		marginBottom: theme.spacing(5)
-		// backgroundColor: 'red',
 	},
 	gridItem: {
 		alignItems: 'center'
@@ -36,9 +36,7 @@ function SignIn(props) {
 	const [email, setEmail] = React.useState('')
 	const [password, setPassword] = React.useState('')
 
-	const validatePassword = (value) => {
-		return (value.length >= 6) ? true : false
-	}
+	const [openSnackBar, setOpenSnackBar] = React.useState(false);
 
 	const handleSubmit = () => {
 		api.post('/sessions', {email, password}).then((res) => {
@@ -47,9 +45,18 @@ function SignIn(props) {
 			setUser(user)
 			props.history.push('/')
 		}).catch(error => {
+			setOpenSnackBar(true)
 			console.log(error)
 		})
-    }
+	}
+
+	const handleClose = (event, reason) => {
+		if (reason === 'clickaway') {
+			return;
+		}
+
+		setOpenSnackBar(false);
+	};
 
 	return (
 		<Paper className={classes.root}>
@@ -67,7 +74,7 @@ function SignIn(props) {
 								label={constants.emailLabel}
 								stateValue={[email, setEmail]}
 								validators={['required', 'isEmail']}
-								errorMessages={['Esse campo é obrigatório', 'Isso não parece um email']}
+								errorMessages={[constants.fieldRequired, constants.emailIncorrect]}
 								/>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>
@@ -75,9 +82,8 @@ function SignIn(props) {
 								label={constants.passwordLabel}
 								type="password"
 								stateValue={[password, setPassword]}
-								validators={['required']}
-								validateField={validatePassword}
-								errorMessages={['Esse campo é obrigatório', 'Mínimo de 6 caracteres']}
+								validators={['required', 'isPassword']}
+								errorMessages={[constants.fieldRequired, constants.passwordShort]}
 								/>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>								
@@ -91,6 +97,21 @@ function SignIn(props) {
 					</Form>
 				</Grid>
 			</Grid>
+			<Snackbar
+				anchorOrigin={{
+					vertical: 'bottom',
+					horizontal: 'left',
+				}}
+				open={openSnackBar}
+				autoHideDuration={6000}
+				onClose={handleClose}
+			>
+				<MySnackbarContentWrapper
+					onClose={handleClose}
+					variant="error"
+					message={constants.errorServer}
+				/>
+			</Snackbar>
 		</Paper>
 	)
 }

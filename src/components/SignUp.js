@@ -1,10 +1,11 @@
 import React from 'react'
 
-import { Paper, makeStyles, Typography, Button, Grid} from '@material-ui/core'
+import { Paper, makeStyles, Typography, Button, Grid, Snackbar} from '@material-ui/core'
 import { Input, Form } from './Input';
 import { constants } from '../constants/constants';
 import api from '../services/api';
 import { setUser, setToken } from '../services/auth';
+import { MySnackbarContentWrapper } from './SnackBar';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -18,7 +19,6 @@ const useStyles = makeStyles(theme => ({
 		width: '100%',
 		flexDirection: 'column',
 		marginBottom: theme.spacing(5)
-		// backgroundColor: 'red',
 	},
 	gridItem: {
 		alignItems: 'center'
@@ -38,6 +38,8 @@ function SignUp(props) {
 	const [password, setPassword] = React.useState('')
 	const [repeatPassword, setRepeatPassword] = React.useState('')
 
+	const [openSnackBar, setOpenSnackBar] = React.useState(false);
+
 	const validateRepeatPassword = () => (repeatPassword === password)
 
 	const handleSubmit = () => {
@@ -47,9 +49,18 @@ function SignUp(props) {
 			setUser(user)
 			props.history.push('/')
 		}).catch(error => {
+			setOpenSnackBar(true)
 			console.log(error)
 		})
-    }
+	}
+	
+	const handleClose = (event, reason) => {
+		if (reason === 'clickaway') {
+			return;
+		}
+
+		setOpenSnackBar(false);
+	};
 
 	return (
 		<Paper className={classes.root}>
@@ -67,7 +78,7 @@ function SignUp(props) {
 								label={constants.fullnameLabel}
 								stateValue={[fullname, setFullName]}
 								validators={['required']}
-								errorMessages={['Esse campo é obrigatório']}
+								errorMessages={[constants.fieldRequired]}
 								/>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>
@@ -75,7 +86,7 @@ function SignUp(props) {
 								label={constants.emailLabel}
 								stateValue={[email, setEmail]}
 								validators={['required', 'isEmail']}
-								errorMessages={['Esse campo é obrigatório', 'Isso não parece um email']}
+								errorMessages={[constants.fieldRequired, constants.emailIncorrect]}
 								/>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>
@@ -84,7 +95,7 @@ function SignUp(props) {
 								type="password"
 								stateValue={[password, setPassword]}
 								validators={['required', 'isPassword']}
-								errorMessages={['Esse campo é obrigatório', 'Mínimo de 6 caracteres']}
+								errorMessages={[constants.fieldRequired, constants.passwordShort]}
 								/>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>
@@ -94,7 +105,7 @@ function SignUp(props) {
 								stateValue={[repeatPassword, setRepeatPassword]}
 								validators={['required', 'customValidation']}
 								customValidation={validateRepeatPassword}
-								errorMessages={['Esse campo é obrigatório', 'As senhas não são iguais']}
+								errorMessages={[constants.fieldRequired, constants.passwordDifferent]}
 								/>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>								
@@ -108,6 +119,21 @@ function SignUp(props) {
 					</Form>
 				</Grid>
 			</Grid>
+			<Snackbar
+				anchorOrigin={{
+					vertical: 'bottom',
+					horizontal: 'left',
+				}}
+				open={openSnackBar}
+				autoHideDuration={6000}
+				onClose={handleClose}
+			>
+				<MySnackbarContentWrapper
+					onClose={handleClose}
+					variant="error"
+					message={constants.errorServer}
+				/>
+			</Snackbar>
 		</Paper>
 	)
 }
