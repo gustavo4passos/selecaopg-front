@@ -43,7 +43,7 @@ function SignIn(props) {
 			const {token, user} = res.data
 			setToken(token)
 			setUser(user)
-			props.history.push('/')
+			props.history.push('/inscricao')
 		}).catch(error => {
 			setOpenSnackBar(true)
 			console.log(error)

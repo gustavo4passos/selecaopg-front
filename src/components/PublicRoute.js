@@ -11,7 +11,7 @@ export const PublicRoute = ({component: Component, restricted, ...rest}) => {
                 isAuthenticated() && restricted ? (
                     <Redirect
                         to={{
-                            pathname: '/',
+                            pathname: '/inscricao',
                             state: { from: props.location  }
                         }}
                     />
