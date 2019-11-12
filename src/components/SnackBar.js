@@ -42,7 +42,7 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-export function MySnackbarContentWrapper(props) {
+export function SnackbarContentWrapper(props) {
     const classes = useStyles();
     const { className, message, onClose, variant, ...other } = props;
     const Icon = variantIcon[variant];
@@ -67,7 +67,7 @@ export function MySnackbarContentWrapper(props) {
     );
 }
 
-MySnackbarContentWrapper.propTypes = {
+SnackbarContentWrapper.propTypes = {
     className: PropTypes.string,
     message: PropTypes.string,
     onClose: PropTypes.func,

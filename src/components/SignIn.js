@@ -5,7 +5,7 @@ import { Input, Form } from './Input';
 import { constants } from '../constants/constants';
 import api, { makeLogin } from '../services/api';
 import { setUser, setToken, getToken } from '../services/auth';
-import { MySnackbarContentWrapper } from './SnackBar';
+import { SnackbarContentWrapper } from './SnackBar';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -104,10 +104,10 @@ function SignIn(props) {
 				}}
 				open={openSnackBar}
 				autoHideDuration={6000}
-				onClose={handleClose}
+				onClose={() => setOpenSnackBar(false)}
 			>
-				<MySnackbarContentWrapper
-					onClose={handleClose}
+				<SnackbarContentWrapper
+					onClose={() => setOpenSnackBar(false)}
 					variant="error"
 					message={constants.errorServer}
 				/>

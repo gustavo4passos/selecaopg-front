@@ -5,7 +5,7 @@ import { Input, Form } from './Input';
 import { constants } from '../constants/constants';
 import api from '../services/api';
 import { setUser, setToken } from '../services/auth';
-import { MySnackbarContentWrapper } from './SnackBar';
+import { SnackbarContentWrapper } from './SnackBar';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -53,14 +53,6 @@ function SignUp(props) {
 			console.log(error)
 		})
 	}
-	
-	const handleClose = (event, reason) => {
-		if (reason === 'clickaway') {
-			return;
-		}
-
-		setOpenSnackBar(false);
-	};
 
 	return (
 		<Paper className={classes.root}>
@@ -126,10 +118,10 @@ function SignUp(props) {
 				}}
 				open={openSnackBar}
 				autoHideDuration={6000}
-				onClose={handleClose}
+				onClose={() => setOpenSnackBar(false)}
 			>
-				<MySnackbarContentWrapper
-					onClose={handleClose}
+				<SnackbarContentWrapper
+					onClose={() => setOpenSnackBar(false)}
 					variant="error"
 					message={constants.errorServer}
 				/>
