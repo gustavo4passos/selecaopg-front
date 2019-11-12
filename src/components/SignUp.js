@@ -54,6 +54,8 @@ function SignUp(props) {
 		})
 	}
 
+	const handleSignIn = () => props.history.push('/entrar')
+
 	return (
 		<Paper className={classes.root}>
 			<Grid container className={classes.grid}>
@@ -107,6 +109,14 @@ function SignUp(props) {
 								variant='contained'
 								type='submit'
 								>{constants.btnLogin}</Button>
+						</Grid>
+						<Grid item xs className={classes.gridForm}>								
+							<Button
+								fullWidth 
+								color='primary'
+								variant='outlined'
+								onClick={handleSignIn}
+								>{constants.btnGoToSignIn}</Button>
 						</Grid>
 					</Form>
 				</Grid>

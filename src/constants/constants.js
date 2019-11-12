@@ -5,6 +5,8 @@ export const constants = {
     repeatPasswordLabel: 'Confirme a senha',
     btnLogin: 'Logar',
     btnSignup: 'Cadastrar',
+    btnGoToSignUp: 'Quero me registrar',
+    btnGoToSignIn: 'Já sou cadastrado',
     signupTitle: 'Registrar',
     loginTitle: 'Entrar',
     errorServer: 'Houve um erro na conexão com o servidor. Tente novamente mais tarde!',
