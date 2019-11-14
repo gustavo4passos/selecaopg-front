@@ -392,6 +392,8 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 
 		let user = getUser()
 
+		if (!user) return
+
 		formData.append('user_id', user.id)
 		formData.append('selection_id', selectionId)
 
@@ -657,8 +659,8 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 										label='Nota *'
 										value={noteRG}
 										onChange={(e) => handleInput('noteRG', e.target.value)}
-										validators={['required']}
-										errorMessages={['Campo obrigatório']}
+										validators={['required', 'isNote']}
+										errorMessages={['Campo obrigatório', 'Nota entre 0 e 10']}
 										fullWidth
 									/>
 								</Grid>

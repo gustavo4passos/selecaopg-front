@@ -1,18 +1,16 @@
-export const isAuthenticated = () => token !== null
+export const isAuthenticated = () => sessionStorage.getItem('@selecaopg/token') !== null
 
-let token = sessionStorage.getItem('@selecaopg/token')
-let user = sessionStorage.getItem('@selecaopg/user')
-
-export const getToken = () => token
-
-export const setToken = (tk) => {
-    token = tk
+export const login = (user, token) => {
     sessionStorage.setItem('@selecaopg/token', token)
-}
-
-export const getUser = () => JSON.parse(user)
-
-export const setUser = (newUser) => {
-    user = newUser
     sessionStorage.setItem('@selecaopg/user', JSON.stringify(user))
 }
+
+export const logout = () => {
+    sessionStorage.removeItem('@selecaopg/token')
+    sessionStorage.removeItem('@selecaopg/user')
+}
+
+export const getToken = () => sessionStorage.getItem('@selecaopg/token')
+
+export const getUser = () => sessionStorage.getItem('@selecaopg/user')
+
