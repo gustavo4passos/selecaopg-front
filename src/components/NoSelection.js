@@ -5,7 +5,7 @@ import { Paper, makeStyles, Typography, Button, CircularProgress, Grid } from '@
 import Enrollment from './Enrollment'
 import api from '../services/api';
 import logoUFBA from '../assets/imgs/logoufba.png'
-import { constants } from 'crypto';
+import { constants } from '../constants/constants';
 
 const useStyles = makeStyles(theme => ({
 	root: {
