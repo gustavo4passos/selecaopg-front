@@ -30,16 +30,15 @@ function NoSelection() {
 	const classes = useStyles()
 
 	return (
-      <Paper className={classes.root}>
-				<Grid container spacing={2}>
-					<Grid item xs={12}>
-						<div className={classes.logo}>
-							<img src={logoUFBA}/>
-						</div>
-					</Grid>
-					<Grid item xs={12}>
-						<Typography className={classes.title}>{constants.noSelection}<br/> {constants.tryAgainLater}</Typography>
-					</Grid>
+      	<Paper className={classes.root}>
+			<Grid container spacing={2}>
+				<Grid item xs={12}>
+					<div className={classes.logo}>
+						<img src={logoUFBA}/>
+					</div>
+				</Grid>
+				<Grid item xs={12}>
+					<Typography className={classes.title}>{constants.noSelection}<br/> {constants.tryAgainLater}</Typography>
 				</Grid>
 			</Grid>
 		</Paper>
