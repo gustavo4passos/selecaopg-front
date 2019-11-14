@@ -304,8 +304,7 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 			formData.append('enade', enade)
 			formData.append('area', area)
 
-			
-			if ( noteType == 'cr')
+			if (noteType == 'cr')
 				ira = Number(noteRG);
 			else
 				ira = Conceito[noteRG];
@@ -316,8 +315,9 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 			}
 			else if(capes < 4){
 				ponderada = Capes[capes]
-				formData.append('capes', capes)
 			}
+
+			formData.append('capes', capes)
 			
 			RG = Math.min(10.0, ((ira - mediaEnade)/devEnade)*1.67 + 5.00) * Number(noteArea);
 			CRPG = noteCRPG * ponderada;
@@ -332,7 +332,7 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 
 		formData.append('crpg', noteCRPG)
 
-		let countOutros = [ 0, 0, 0, 0, 0, 0];
+		let countOutros = [0, 0, 0, 0, 0, 0];
 		
 		for(let i in scientificProductions){
 			let producao = scientificProductions[i]
@@ -381,7 +381,7 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 		PI = Math.min(qualis + outros, 10.0);
 
 		score = RG + CRPG + PI;
-
+		score = Number(score).toFixed(2)
 		formData.append('score', score);
 
 		if(undergraduateTranscript.value.name !== '') {	
