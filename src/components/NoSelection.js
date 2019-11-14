@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 
-import { Paper, makeStyles, Typography, Button, CircularProgress, Grid } from '@material-ui/core'
+import { Paper, makeStyles, Typography, Grid } from '@material-ui/core'
 
-import Enrollment from './Enrollment'
-import api from '../services/api';
 import logoUFBA from '../assets/imgs/logoufba.png'
 import { constants } from '../constants/constants';
 
@@ -32,8 +30,7 @@ function NoSelection() {
 	const classes = useStyles()
 
 	return (
-		<div className='main-page'>
-            <Paper className={classes.root}>
+      <Paper className={classes.root}>
 				<Grid container spacing={2}>
 					<Grid item xs={12}>
 						<div className={classes.logo}>
@@ -44,8 +41,8 @@ function NoSelection() {
 						<Typography className={classes.title}>{constants.noSelection}<br/> {constants.tryAgainLater}</Typography>
 					</Grid>
 				</Grid>
-			</Paper>
-        </div>
+			</Grid>
+		</Paper>
 	)
 }
 

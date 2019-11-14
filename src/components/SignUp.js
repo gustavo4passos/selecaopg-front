@@ -4,7 +4,7 @@ import { Paper, makeStyles, Typography, Button, Grid, Snackbar, CircularProgress
 import { Input, Form } from './Input';
 import { constants } from '../constants/constants';
 import api from '../services/api';
-import { setUser, setToken } from '../services/auth';
+import { login } from '../services/auth';
 import { SnackbarContentWrapper } from './SnackBar';
 
 const useStyles = makeStyles(theme => ({
@@ -50,11 +50,9 @@ function SignUp(props) {
 		setAuthenticating(true)
 
 		api.post('/users', {fullname, email, password}).then((res) => {
-			console.log(res.data)
 			const {token, user} = res.data
 
-			setToken(token)
-			setUser(user)
+			login(user, token)
 			setAuthenticating(false)
 
 			props.history.push('/inscricao')

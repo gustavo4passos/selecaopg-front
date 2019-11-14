@@ -1,4 +1,4 @@
-import React, { Children } from 'react'
+import React from 'react'
 
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 

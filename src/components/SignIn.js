@@ -3,8 +3,8 @@ import React, { useState } from 'react'
 import { Paper, makeStyles, Typography, Button, Grid, Snackbar, CircularProgress} from '@material-ui/core'
 import { Input, Form } from './Input';
 import { constants } from '../constants/constants';
-import api, { makeLogin } from '../services/api';
-import { setUser, setToken, getToken } from '../services/auth';
+import api from '../services/api';
+import { login } from '../services/auth';
 import { SnackbarContentWrapper } from './SnackBar';
 
 const useStyles = makeStyles(theme => ({
@@ -48,8 +48,7 @@ function SignIn(props) {
 		api.post('/sessions', {email, password}).then((res) => {
 			const {token, user} = res.data
 
-			setToken(token)
-			setUser(user)
+			login(user, token)
 			setAuthenticating(false)
 
 			props.history.push('/inscricao')
@@ -73,14 +72,6 @@ function SignIn(props) {
 			setAuthenticating(false)
 		})
 	}
-
-	const handleClose = (event, reason) => {
-		if (reason === 'clickaway') {
-			return;
-		}
-
-		setSnackBar({...snackBar, open: false});
-	};
 
 	const handleSignUp = () => props.history.push('/cadastrar')
 
