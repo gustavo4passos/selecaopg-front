@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from 'react'
 
-import { Paper, makeStyles, Typography, Button } from '@material-ui/core'
-
 import Enrollment from './Enrollment'
 import api from '../services/api';
 import Loading from './Loading';
 import NoSelection from './NoSelection';
-import Axios from 'axios';
-import { isBuffer } from 'util';
 import Ranking from './Ranking';
 
+import { Fab } from '@material-ui/core'
+import { makeStyles } from '@material-ui/styles'
+import ExitToAppIcon from '@material-ui/icons/ExitToApp'
+import { logout } from '../services/auth';
+
 const useStyles = makeStyles(theme => ({
-	root: {
-		
+	fab: {
+		position: 'fixed',
+		bottom: '3em',
+		right: '3em'
 	}
 }))
 
-function Selection() {
+function Selection(props) {
 	const classes = useStyles()
+
 	const [selection, setSelection] = useState(null)
 	const [enrollment, setEnrollment] = useState(null)
 	const [ranking, setRanking] = useState(0)
@@ -101,9 +105,20 @@ function Selection() {
 		setLoading(false)
 	}
 
-	console.log('LOADING', isLoading)
-	console.log('selection', selection)
-	console.log('enrollment', enrollment)
+	const handleLogout = async () => {
+		setLoading(true)
+
+		try {
+			logout()
+			//await api.post('/sessions/logout')
+			props.history.push('/entrar')
+		} catch(err) {
+			console.log(err)
+		}
+
+		setLoading(false)
+	}
+
 	return (
 		<>
 		{
@@ -126,6 +141,9 @@ function Selection() {
 						edit={edit}
 					/>
 		}
+			<Fab color='primary' className={classes.fab} onClick={() => handleLogout()}>
+				<ExitToAppIcon/>
+			</Fab>
 		</>
 	)
 }
