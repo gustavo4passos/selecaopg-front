@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Redirect } from 'react-router-dom'
 
 import { PublicRoute } from './components/PublicRoute'
 import { PrivateRoute } from './components/PrivateRoute'
@@ -15,6 +15,7 @@ const Routes = () => ((
             <PublicRoute path='/entrar' component={SignIn} restricted={true}/>     
             <PublicRoute path='/cadastrar' component={SignUp} restricted={true}/>
             <PrivateRoute path='/inscricao' component={Selection}/>
+            <Redirect path='*' to='/entrar'/>
         </Switch>
     </Router>
 ))

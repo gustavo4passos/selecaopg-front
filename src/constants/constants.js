@@ -14,5 +14,10 @@ export const constants = {
     fieldRequired: 'Esse campo é obrigatório',
     emailIncorrect: 'Isso não parece um email',
     passwordShort: 'Mínimo de 6 caracteres',
-    passwordDifferent: 'As senhas não são iguais'
+    passwordDifferent: 'As senhas não são iguais',
+
+    // ERRORS MESSAGES
+    USER_NOT_FOUND: {code: 'USER_NOT_FOUND', message: 'Usuário não encontrado.'},
+    INVALID_PASSWORD: {code: 'INVALID_PASSWORD', message: 'Senha incorreta.'},
+    ERROR_SERVER: 'Houve um erro na conexão com o servidor, tente novamente mais tarde.'
 }

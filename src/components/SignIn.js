@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-import { Paper, makeStyles, Typography, Button, Grid, Snackbar} from '@material-ui/core'
+import { Paper, makeStyles, Typography, Button, Grid, Snackbar, CircularProgress} from '@material-ui/core'
 import { Input, Form } from './Input';
 import { constants } from '../constants/constants';
 import api, { makeLogin } from '../services/api';
@@ -33,20 +33,44 @@ const useStyles = makeStyles(theme => ({
 function SignIn(props) {
 	const classes = useStyles();
 
-	const [email, setEmail] = React.useState('')
-	const [password, setPassword] = React.useState('')
+	const [email, setEmail] = useState('')
+	const [password, setPassword] = useState('')
+	const [snackBar, setSnackBar] = useState({open: false, message: '', type: ''})
+	const [isAuthenticating, setAuthenticating] = useState(false)
 
-	const [openSnackBar, setOpenSnackBar] = React.useState(false);
+	const showError = (message) => {
+		setSnackBar({open: true, type: 'error', message})
+	}
 
 	const handleSubmit = () => {
+		setAuthenticating(true)
+
 		api.post('/sessions', {email, password}).then((res) => {
 			const {token, user} = res.data
+
 			setToken(token)
 			setUser(user)
+			setAuthenticating(false)
+
 			props.history.push('/inscricao')
-		}).catch(error => {
-			setOpenSnackBar(true)
-			console.log(error)
+		}).catch((error) => {
+			if (!error.response) {
+				showError(constants.ERROR_SERVER)
+				setAuthenticating(false)
+				return
+			}
+
+			const { code } = error.response.data
+
+			if (code === constants.USER_NOT_FOUND.code) {
+				showError(constants.USER_NOT_FOUND.message)
+			} else if (code === constants.INVALID_PASSWORD.code) {
+				showError(constants.INVALID_PASSWORD.message)
+			} else {
+				showError(constants.ERROR_SERVER)
+			}
+
+			setAuthenticating(false)
 		})
 	}
 
@@ -55,7 +79,7 @@ function SignIn(props) {
 			return;
 		}
 
-		setOpenSnackBar(false);
+		setSnackBar({...snackBar, open: false});
 	};
 
 	const handleSignUp = () => props.history.push('/cadastrar')
@@ -94,7 +118,9 @@ function SignIn(props) {
 								color='primary'
 								variant='contained'
 								type='submit'
-								>{constants.btnLogin}</Button>
+							>
+								{isAuthenticating ? <CircularProgress size={24} color='inherit'/> : constants.btnLogin}
+							</Button>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>								
 							<Button
@@ -102,7 +128,9 @@ function SignIn(props) {
 								color='primary'
 								variant='outlined'
 								onClick={handleSignUp}
-								>{constants.btnGoToSignUp}</Button>
+							>
+								{constants.btnGoToSignUp}
+							</Button>
 						</Grid>
 					</Form>
 				</Grid>
@@ -112,14 +140,14 @@ function SignIn(props) {
 					vertical: 'bottom',
 					horizontal: 'left',
 				}}
-				open={openSnackBar}
+				open={snackBar.open}
 				autoHideDuration={6000}
-				onClose={() => setOpenSnackBar(false)}
+				onClose={() => setSnackBar({...snackBar, open: false})}
 			>
 				<SnackbarContentWrapper
-					onClose={() => setOpenSnackBar(false)}
-					variant="error"
-					message={constants.errorServer}
+					onClose={() => setSnackBar({...snackBar, open: false})}
+					variant={snackBar.type}
+					message={snackBar.message}
 				/>
 			</Snackbar>
 		</Paper>

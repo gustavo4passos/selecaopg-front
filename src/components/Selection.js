@@ -20,12 +20,17 @@ function Selection() {
 	const classes = useStyles()
 	const [selection, setSelection] = useState(null)
 	const [enrollment, setEnrollment] = useState(null)
+	const [ranking, setRanking] = useState(0)
 	const [isLoading, setLoading] = useState(true)
 	const [edit, setEdit] = useState(false)
 
+	const fetchRanking = async (enrollmentId) => {
+		const response = await api.get(`/ranking/${enrollmentId}`)
+
+		setRanking(response.data.ranking)
+	}
+
 	useEffect(() => {
-		
-		
 		let user = sessionStorage.getItem('@selecaopg/user')
 
 		if (!user) return
@@ -34,9 +39,9 @@ function Selection() {
 		setLoading(true)
 
 		const fetchUserEnrollments = async () => {
-			const response = await api.get(`/users/${user.id}/enrollments/`)
+			const response = await api.get(`/users/${user.id}`)
 
-			return response.data
+			return response.data.enrollments
 		}
 
 		const fetchSelection = async () => {
@@ -56,7 +61,7 @@ function Selection() {
 				}
 
 				if (ok) {
-					console.log('opa')
+					await fetchRanking(enrollment.id)
 					setEnrollment(enrollment)
 				}
 			} catch(err) {
@@ -69,8 +74,31 @@ function Selection() {
 		fetchSelection()
 	}, [])
 
-	const handleEnrollment = (enrollment) => {
+	const handleEnrollment = async (enrollment) => {
+		setLoading(true)
 
+		try {
+			await fetchRanking(enrollment.id)
+		} catch(err) {
+			console.log(err.response.data)
+		}
+		
+		setEnrollment(enrollment)
+		setLoading(false)
+	}
+
+	const handleDeleteEnrollment = async (id) => {
+		setLoading(true)
+
+		try {
+			const response = await api.delete(`/enrollments/${id}`)
+			
+			setEnrollment(null)
+		} catch(err) {
+			console.log(err)
+		}
+
+		setLoading(false)
 	}
 
 	console.log('LOADING', isLoading)
@@ -84,11 +112,18 @@ function Selection() {
 				!selection ?
 				<NoSelection/> :
 					enrollment && !edit ?
-					<Ranking enrollment={enrollment}/> :
+					<Ranking 
+						enrollment={enrollment}
+						selection={selection}
+						ranking={ranking}
+						setEdit={(value) => setEdit(value)}
+						handleDelete={handleDeleteEnrollment}
+					/> :
 					<Enrollment 
 						selectionId={selection.id}
 						enrollment={enrollment}
-						handleEnrollment={(enrollment) => handleEnrollment(enrollment)}	
+						handleEnrollment={handleEnrollment}	
+						edit={edit}
 					/>
 		}
 		</>

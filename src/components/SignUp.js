@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-import { Paper, makeStyles, Typography, Button, Grid, Snackbar} from '@material-ui/core'
+import { Paper, makeStyles, Typography, Button, Grid, Snackbar, CircularProgress} from '@material-ui/core'
 import { Input, Form } from './Input';
 import { constants } from '../constants/constants';
 import api from '../services/api';
@@ -33,23 +33,34 @@ const useStyles = makeStyles(theme => ({
 function SignUp(props) {
 	const classes = useStyles()
 	
-	const [fullname, setFullName] = React.useState('')
-	const [email, setEmail] = React.useState('')
-	const [password, setPassword] = React.useState('')
-	const [repeatPassword, setRepeatPassword] = React.useState('')
-
-	const [openSnackBar, setOpenSnackBar] = React.useState(false);
+	const [fullname, setFullName] = useState('')
+	const [email, setEmail] = useState('')
+	const [password, setPassword] = useState('')
+	const [repeatPassword, setRepeatPassword] = useState('')
+	const [snackBar, setSnackBar] = useState({open: false, message: '', type: ''})
+	const [isAuthenticating, setAuthenticating] = useState(false)
 
 	const validateRepeatPassword = () => (repeatPassword === password)
 
+	const showError = (message) => {
+		setSnackBar({open: true, type: 'error', message})
+	}
+
 	const handleSubmit = () => {
+		setAuthenticating(true)
+
 		api.post('/users', {fullname, email, password}).then((res) => {
+			console.log(res.data)
 			const {token, user} = res.data
+
 			setToken(token)
 			setUser(user)
+			setAuthenticating(false)
+
 			props.history.push('/inscricao')
 		}).catch(error => {
-			setOpenSnackBar(true)
+			showError(constants.ERROR_SERVER)
+			setAuthenticating(false)
 			console.log(error)
 		})
 	}
@@ -108,7 +119,9 @@ function SignUp(props) {
 								color='primary'
 								variant='contained'
 								type='submit'
-								>{constants.btnLogin}</Button>
+							>
+								{isAuthenticating ? <CircularProgress size={24} color='inherit'/> : constants.btnSignup}
+							</Button>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>								
 							<Button
@@ -126,12 +139,12 @@ function SignUp(props) {
 					vertical: 'bottom',
 					horizontal: 'left',
 				}}
-				open={openSnackBar}
+				open={snackBar.open}
 				autoHideDuration={6000}
-				onClose={() => setOpenSnackBar(false)}
+				onClose={() => setSnackBar({...snackBar, open: false})}
 			>
 				<SnackbarContentWrapper
-					onClose={() => setOpenSnackBar(false)}
+					onClose={() => setSnackBar({...snackBar, open: false})}
 					variant="error"
 					message={constants.errorServer}
 				/>

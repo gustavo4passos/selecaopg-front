@@ -142,7 +142,7 @@ const tables = {
 const arrayQualis = Object.keys(tables.Categoria.Qualis)
 const arrayOutros = Object.keys(tables.Categoria.Outros)
 
-function Enrollment({selectionId, ...props}) {
+const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props}) => {
 	const classes = useStyles()
 
 	const [inputs, setInputs] = useState({
@@ -170,7 +170,7 @@ function Enrollment({selectionId, ...props}) {
 		graduateTranscript: {value: new File([], ''), error: null},
 	})
 
-	const [openSnackBar, setOpenSnackBar] = React.useState({error: false, message: ''});
+	const [snackBar, setSnackBar] = useState({open: false, message: '', type: ''})
 
 	const [isRegistering, setRegistering] = useState(false)
   
@@ -185,16 +185,47 @@ function Enrollment({selectionId, ...props}) {
 	} = inputs
 
 	useEffect(() => {
-		// setInputs({
-		// 	...inputs,
-		// 	name: 'a',
-		// 	email: 'igoor1205@gmail.com',
-		// 	phone: '71',
-		// 	degree: 'doctorate',
-		// 	noteType: 'cr',
-		// 	noteRG: '9',
+		if (edit === true) {
+			let user = sessionStorage.getItem('@selecaopg/user')
+			if (!user) return
 
-		// })
+			user = JSON.parse(user)
+
+			setInputs({
+				...inputs,
+				name: user.fullname,
+				email: user.email,
+				phone: enrollment.phone,
+				advisorName: enrollment.advisor_name,
+				entrySemester: enrollment.entry_semester,
+				lattesLink: enrollment.lattes_link,
+				undergraduateUniversity: enrollment.undergraduate_university,
+				enadeLink: enrollment.enade_link,
+
+				degree: enrollment.degree,
+				mastersFreshman: enrollment.mastersFreshman,
+				
+				noteType: enrollment.noteType,
+				noteRG: enrollment.noteRG,
+				area: enrollment.area,
+				enade: enrollment.enade,
+				noteCRPG: enrollment.noteCRPG,
+				capes: enrollment.capes,
+				scientificProductions: enrollment.publications.map(publication => ({
+					category: publication.category,
+					publicationMode: publication.hasFile?'file':'link',
+					publicationLink: publication.pdfLink,
+					publicationFile: {value: new File([], ''), error: null},
+					proceedingsLink: publication.proceedingsLink,
+					eventLink: publication.eventLink,
+				})),
+
+				undergraduateTranscript: {value: new File([], ''), error: null},
+				graduateTranscript: {value: new File([], ''), error: null},
+	
+			})
+		}
+		
 
 		ValidatorForm.addValidationRule('isURL', (value) => {
 			return value.length == 0 || validator.isURL(value)
@@ -211,10 +242,6 @@ function Enrollment({selectionId, ...props}) {
 		// Inputmask('[9[,99]]|[1[0][,00]]').mask('#note-crpg-input')
 		
 	}, [])
-
-	useEffect(() => {
-
-	})
 
 	const validateFile = (file, types, size) => {
 		let sp = file.name.split('.')
@@ -242,7 +269,7 @@ function Enrollment({selectionId, ...props}) {
 		setRegistering(true)
 
 		const showError = (message) => {
-			setOpenSnackBar({error: true, message})
+			setSnackBar({open: true, type: 'error', message})
 			setRegistering(false)
 		}
 
@@ -250,13 +277,14 @@ function Enrollment({selectionId, ...props}) {
 		let publications = []
 		let score = 0
 
+		formData.append('phone', phone)
 		formData.append('entry_semester', entrySemester)
 		formData.append('degree', degree)
 		formData.append('advisor_name', advisorName)
 		formData.append('lattes_link', lattesLink)
 		formData.append('undergraduate_university', undergraduateUniversity)
 		formData.append('enade_link', enadeLink)
-
+		
 		//RG + CRPG + PI
 
 		let RG = 0;
@@ -274,20 +302,26 @@ function Enrollment({selectionId, ...props}) {
 			let devEnade = ENADE[enade][1];
 			let noteArea = Area[area];
 
+			formData.append('enade', enade)
+			formData.append('area', area)
+
+			formData.append('score_type', noteType)
 			if ( noteType == 'cr')
 				ira = Number(noteRG);
 			else
 				ira = Conceito[noteRG];
 
+			formData.append('rg', noteRG)
 			if(mastersFreshman){
 				ponderada = 0.3;
 			}
 			else if(capes < 4){
-				ponderada = Capes[capes];
+				ponderada = Capes[capes]
+				formData.append('capes', capes)
 			}
+			
 			console.log(ira, mediaEnade, devEnade, noteArea)
 			RG = Math.min(10.0, ((ira - mediaEnade)/devEnade)*1.67 + 5.00) * Number(noteArea);
-
 			CRPG = noteCRPG * ponderada;
 		}
 		else if( degree == 'doctorate'){
@@ -298,6 +332,8 @@ function Enrollment({selectionId, ...props}) {
 			CRPG = noteCRPG * ponderada;
 		}
 
+		formData.append('crpg', noteCRPG)
+
 		let countOutros = [ 0, 0, 0, 0, 0, 0];
 		
 		for(let i in scientificProductions){
@@ -305,10 +341,12 @@ function Enrollment({selectionId, ...props}) {
 			let publication = {}
 
 			publication.category = producao.category
-
+			publication.proceedingsLink = producao.proceedingsLink
+			publication.eventLink = producao.eventLink
 			if(producao.publicationMode == 'link'){
 				publication.link = producao.publicationLink
 				// formPublication.append('link', producao.publicationLink);
+				publication.hasFile = false
 			}
 			else{
 				if(validateFile(producao.publicationFile.value, ['pdf'], MAX_FILE_SIZE)) {
@@ -317,15 +355,15 @@ function Enrollment({selectionId, ...props}) {
 				} else {
 					showError(constants.errorFileSize)
 				}
-					
+				
+				publication.hasFile = true
 			}
 			
 			let indexQualis = arrayQualis.indexOf(producao.category);
 			if(indexQualis != -1){
 				qualis += Categoria.Qualis[producao.category];
 				publication.score = Categoria.Qualis[producao.category]
-			}
-			else{
+			} else{
 				let indexOutros = arrayOutros.indexOf(producao.category);
 
 				if(indexOutros != -1){
@@ -340,19 +378,19 @@ function Enrollment({selectionId, ...props}) {
 
 			publications.push(publication);
 		}
-		console.log('publications', publications)
+		// console.log('publications', publications)
 		formData.append('publications', JSON.stringify(publications))
-		console.log('qualis', qualis)
-		console.log('outros', outros)
+		// console.log('qualis', qualis)
+		// console.log('outros', outros)
 
 		PI = Math.min(qualis + outros, 10.0);
 
-		console.log('RG', RG)
-		console.log('CRPG', CRPG)
-		console.log('PI', PI)
+		// console.log('RG', RG)
+		// console.log('CRPG', CRPG)
+		// console.log('PI', PI)
 
 		score = RG + CRPG + PI;
-		console.log('score', score)
+		// console.log('score', score)
 		formData.append('score', score);
 
 		if(undergraduateTranscript.value.name !== '') {	
@@ -368,18 +406,19 @@ function Enrollment({selectionId, ...props}) {
 		formData.append('user_id', user.id)
 		formData.append('selection_id', selectionId) // props.selection.id
 
-		const config = {
+		api({
+			method: edit ? 'PUT' : 'POST',
+			url: '/enrollments',
+			data: formData,
 			headers: { 'content-type': 'multipart/form-data' }
-		}
-		
-		api.post('/enrollments', formData, config)
-		.then(response => { 
+		}).then(response => { 
 			console.log(response)
 			setRegistering(false)
+			handleEnrollment(response.data)
 		})
 		.catch(error => { 
 			console.log(error)
-      showError(constants.errorServer)
+     		showError(constants.errorServer)
 			setRegistering(false)
 		})
   	}
@@ -874,7 +913,7 @@ function Enrollment({selectionId, ...props}) {
 					
 					<Grid item xs={12}>
 						<Button disabled={degree === ''} color='primary' variant='contained' type='submit'>
-							{isRegistering ? <CircularProgress color='default' size={24}/> : "Inscrever-se"}
+							{isRegistering ? <CircularProgress color='default' size={24}/> : edit ? 'Atualizar' : "Inscrever-se"}
 						</Button>
 					</Grid>
 				</Grid>
@@ -884,14 +923,14 @@ function Enrollment({selectionId, ...props}) {
 					vertical: 'bottom',
 					horizontal: 'left',
 				}}
-				open={openSnackBar.error}
+				open={snackBar.open}
 				autoHideDuration={6000}
-				onClose={() => setOpenSnackBar({error: false, message: ''})}
+				onClose={() => setSnackBar({...snackBar, open: false})}
 			>
 				<SnackbarContentWrapper
-					onClose={() => setOpenSnackBar({error: false, message: ''})}
+					onClose={() => setSnackBar({...snackBar, open: false})}
 					variant="error"
-					message={openSnackBar.message}
+					message={constants.errorServer}
 				/>
 			</Snackbar>
 		</Paper>
