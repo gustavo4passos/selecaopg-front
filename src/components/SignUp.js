@@ -81,7 +81,7 @@ function SignUp(props) {
 								label={constants.fullnameLabel}
 								stateValue={[fullname, setFullName]}
 								validators={['required']}
-								errorMessages={[constants.fieldRequired]}
+								errorMessages={[constants.REQUIRED_FIELD]}
 								/>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>
@@ -89,7 +89,7 @@ function SignUp(props) {
 								label={constants.emailLabel}
 								stateValue={[email, setEmail]}
 								validators={['required', 'isEmail']}
-								errorMessages={[constants.fieldRequired, constants.emailIncorrect]}
+								errorMessages={[constants.REQUIRED_FIELD, constants.EMAIL_INCORRECT]}
 								/>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>
@@ -98,7 +98,7 @@ function SignUp(props) {
 								type="password"
 								stateValue={[password, setPassword]}
 								validators={['required', 'isPassword']}
-								errorMessages={[constants.fieldRequired, constants.passwordShort]}
+								errorMessages={[constants.REQUIRED_FIELD, constants.PASSWORD_SHORT]}
 								/>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>
@@ -108,7 +108,7 @@ function SignUp(props) {
 								stateValue={[repeatPassword, setRepeatPassword]}
 								validators={['required', 'customValidation']}
 								customValidation={validateRepeatPassword}
-								errorMessages={[constants.fieldRequired, constants.passwordDifferent]}
+								errorMessages={[constants.REQUIRED_FIELD, constants.PASSWORD_DIFF]}
 								/>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>								

@@ -259,7 +259,7 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 			let prod = scientificProductions[i]
 
 			if (prod.publicationMode === 'file' && prod.publicationFile.value.name === '') {
-				scientificProductions[i].publicationFile = {...prod.publicationFile, error: 'Campo obrigatório'} 
+				scientificProductions[i].publicationFile = {...prod.publicationFile, error: constants.REQUIRED_FIELD} 
 				setInputs({...inputs, scientificProductions: [...scientificProductions]})
 				return
 			}
@@ -449,9 +449,9 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 			const validate = validateFile(value, ['pdf'], MAX_FILE_SIZE)
 
 			if (validate === 'type') {
-				setInputs({...inputs, [key]: {value: new File([], ''), error: 'Tipo incorreto, somente PDF'}})
+				setInputs({...inputs, [key]: {value: new File([], ''), error: constants.FILE_ONLY_PDF}})
 			} else if (validate === 'size') {
-				setInputs({...inputs, [key]: {value: new File([], ''), error: 'Tamanho máximo de 15 MB excedido'}})
+				setInputs({...inputs, [key]: {value: new File([], ''), error: constants.FILE_SIZE}})
 			} else setInputs({...inputs, [key]: {value, error: null}})
 		} else setInputs({...inputs, [key]: value})
 	}
@@ -461,9 +461,9 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 			const validate = validateFile(value, ['pdf'], MAX_FILE_SIZE)
 
 			if (validate === 'type') {
-				scientificProductions[num][key] = {value: new File([], ''), error: 'Tipo incorreto, somente PDF'}
+				scientificProductions[num][key] = {value: new File([], ''), error: constants.FILE_ONLY_PDF}
 			} else if (validate === 'size') {
-				scientificProductions[num][key] = {value: new File([], ''), error: 'Tamanho máximo de 15 MB excedido'}
+				scientificProductions[num][key] = {value: new File([], ''), error: constants.FILE_SIZE}
 			} else {
 				scientificProductions[num][key] = {value, error: null}
 			}
@@ -486,10 +486,10 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 					<Grid item xs={12} className={classes.header}>
 						<div className={classes.subheader}>
 							<Typography className={classes.title}>
-								<span>PGCOMP<br/></span>
-								Programa de Pós-graduação<br/>em Ciência da Computação
+								<span>{constants.pgcompTitle}<br/></span>
+								{constants.progLabel}<br/>{constants.ccLabel}
 							</Typography>
-							<Typography className={classes.subtitle}>O presente formulário se destina a comprovação dos dados referentes ao Edital 06/2019 do Programa de Pós-Graduação em Computação - PGCOMP da Universidade Federal da Bahia - UFBA.</Typography>
+							<Typography className={classes.subtitle}>{constants.formDesc}</Typography>
 						</div>
 						<div className={classes.logo}>
 							<img src={logoUFBA}/>
@@ -499,12 +499,12 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 						<TextValidator
 							id='name-input'
 							variant='outlined'
-							label='Nome Completo *'
+							label={constants.fullnameReq}
 							name='name'
 							value={inputs.name}
 							onChange={(e) => handleInput('name', e.target.value)}
 							validators={['required', 'isAlpha']}
-							errorMessages={['Campo obrigatório', 'Caracteres inválidos']}
+							errorMessages={[constants.REQUIRED_FIELD, constants.CHAR_INVALID]}
 							fullWidth
 						/>
 					</Grid>
@@ -512,12 +512,12 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 						<TextValidator
 							id='email-input'
 							variant='outlined'
-							label='Email *'
+							label={constants.emailReq}
 							name='email'
 							value={inputs.email}
 							onChange={(e) => handleInput('email',e.target.value)}
 							validators={['required', 'isEmail']}
-							errorMessages={['Campo obrigatório', 'Email inválido']}
+							errorMessages={[constants.REQUIRED_FIELD, constants.EMAIL_INCORRECT]}
 							fullWidth
 						/>
 					</Grid>
@@ -526,12 +526,12 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 							id='phone-input'
 							type='text'
 							variant='outlined'
-							label='Celular *'
+							label={constants.phoneReq}
 							name='phone'
 							value={inputs.phone}
 							onChange={(e) => handleInput('phone', e.target.value)}
 							validators={['required']}
-							errorMessages={['Campo obrigatório']}
+							errorMessages={[constants.REQUIRED_FIELD]}
 							fullWidth
 						/>
 					</Grid>
@@ -539,12 +539,12 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 					<Grid item xs={12} sm={8}>
 						<TextValidator
 							variant='outlined'
-							label='Nome do Orientador *'
+							label={constants.orienReq}
 							name='advisor-name'
 							value={inputs.advisorName}
 							onChange={(e) => handleInput('advisorName', e.target.value)}
 							validators={['required']}
-							errorMessages={['Campo obrigatório']}
+							errorMessages={[constants.REQUIRED_FIELD]}
 							fullWidth
 						/>
 					</Grid>
@@ -552,24 +552,24 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 						<TextValidator
 							id='semester-input'
 							variant='outlined'
-							label='Semestre de Entrada *'
+							label={constants.semesterEntryReq}
 							name='entry-semester'
 							value={inputs.entrySemester}
 							onChange={(e) => handleInput('entrySemester', e.target.value)}
 							validators={['required']}
-							errorMessages={['Campo obrigatório']}
+							errorMessages={[constants.REQUIRED_FIELD]}
 							fullWidth
 						/>
 					</Grid>
 					<Grid item xs={12}>
 						<TextValidator
 							variant='outlined'
-							label='Universidade em que cursou a graduação *'
+							label={constants.underUnivReq}
 							name='undergraduate-university'
 							value={inputs.undergraduateUniversity}
 							onChange={(e) => handleInput('undergraduateUniversity', e.target.value)}
 							validators={['required']}
-							errorMessages={['Campo obrigatório']}
+							errorMessages={[constants.REQUIRED_FIELD]}
 							fullWidth
 						/>
 					</Grid>
@@ -577,33 +577,33 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 					<Grid item xs={12}>
 						<TextValidator
 							variant='outlined'
-							label='Link para CV Lattes *'
+							label={constants.lattesLinkReq}
 							name='lattes-link'
 							value={inputs.lattesLink}
 							onChange={(e) => handleInput('lattesLink', e.target.value)}
 							validators={['required', 'isURL']}
-							errorMessages={['Campo obrigatório', 'URL inválida']}
+							errorMessages={[constants.REQUIRED_FIELD, constants.URL_INVALID]}
 							fullWidth
 						/>
 					</Grid>
 					<Grid item xs={12}>
 						<TextValidator
 							variant='outlined'
-							label='Link para ENADE'
+							label={constants.linkEnade}
 							name='enade-link'
 							value={inputs.enadeLink}
 							onChange={(e) => handleInput('enadeLink', e.target.value)}
 							validators={['isURL']}
-							errorMessages={['URL inválida']}
+							errorMessages={[constants.URL_INVALID]}
 							fullWidth
 						/>
 					</Grid>
 					<Grid item xs={12}>
 						<FormControl color='primary'>
-							<FormLabel component='p'>Curso do Candidato(a) *</FormLabel>
+							<FormLabel component='p'>{constants.courseReq}</FormLabel>
 							<RadioGroup name='degree' value={degree} onChange={e => handleInput('degree', e.target.value)}>
-								<FormControlLabel value='masters' label='Mestrado' control={<Radio color='primary'/>}/>
-								<FormControlLabel value='doctorate' label='Doutorado' control={<Radio color='primary'/>}/>
+								<FormControlLabel value='masters' label={constants.mestradoLabel} control={<Radio color='primary'/>}/>
+								<FormControlLabel value='doctorate' label={constants.doctorLabel} control={<Radio color='primary'/>}/>
 							</RadioGroup>
 						</FormControl>
 					</Grid>
@@ -612,20 +612,20 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 						<>
 							<Grid item xs={12}>
 								<FormControl>
-									<FormControlLabel label='Sou ingressante de mestrado.' control={
+									<FormControlLabel label={constants.mastersFreshman} control={
 										<Checkbox checked={mastersFreshman} onChange={() => handleInput('mastersFreshman', !mastersFreshman)} color='primary'/>
 									}/>
 								</FormControl>
 							</Grid>
 							<Grid item xs={12}>
-								<FormLabel component='p'>Coeficiente de Rendimento da Graduação</FormLabel>
+								<FormLabel component='p'>{constants.scoreUndergrad}</FormLabel>
 							</Grid>
 							<Grid item xs={12}>
 								<FormControl color='primary'>
-									<FormLabel>IRA (Índice de Rendimento Acadêmico)</FormLabel>
+									<FormLabel>{constants.iraLabel}</FormLabel>
 									<RadioGroup value={noteType} name='noteType' row onChange={e => handleInput('noteType', e.target.value)}>
-										<FormControlLabel value='cr' label='CR (Coeficiente de Rendimento)' control={<Radio color='primary'/>}/>
-										<FormControlLabel value='conceito' label='Notas por Conceito' control={<Radio color='primary'/>}/>
+										<FormControlLabel value='cr' label={constants.crLabel} control={<Radio color='primary'/>}/>
+										<FormControlLabel value='conceito' label={constants.gradeLabel} control={<Radio color='primary'/>}/>
 									</RadioGroup>
 								</FormControl>
 							</Grid>	
@@ -635,18 +635,18 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 								<Grid item xs={12} sm={3}>
 									<SelectValidator
 										variant='outlined'
-										label='Conceito *'
+										label={constants.conceitoReq}
 										value={noteRG}
 										onChange={(e) => handleInput('noteRG', e.target.value)}
 										validators={['required']}
-										errorMessages={['Campo obrigatório']}
+										errorMessages={[constants.REQUIRED_FIELD]}
 										fullWidth
 									>	
-										<MenuItem value='A'>A</MenuItem>
-										<MenuItem value='B'>B</MenuItem>
-										<MenuItem value='C'>C</MenuItem>
-										<MenuItem value='D'>D</MenuItem>
-										<MenuItem value='E'>E</MenuItem>
+										<MenuItem value='A'>{constants.valueA}</MenuItem>
+										<MenuItem value='B'>{constants.valueB}</MenuItem>
+										<MenuItem value='C'>{constants.valueC}</MenuItem>
+										<MenuItem value='D'>{constants.valueD}</MenuItem>
+										<MenuItem value='E'>{constants.valueE}</MenuItem>
 									</SelectValidator>	
 								</Grid> 
 							}
@@ -656,11 +656,12 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 									<TextValidator
 										id='note-rg-input'
 										variant='outlined'
-										label='Nota *'
+										label={constants.noteReq}
 										value={noteRG}
 										onChange={(e) => handleInput('noteRG', e.target.value)}
 										validators={['required', 'isNote']}
-										errorMessages={['Campo obrigatório', 'Nota entre 0 e 10']}
+										errorMessages={[constants.REQUIRED_FIELD, 'Nota entre 0 e 10']}
+
 										fullWidth
 									/>
 								</Grid>
@@ -668,53 +669,53 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 							<Grid item xs={12} sm={6} alignItems='flex-start' alignContent='flex-start'>
 								<SelectValidator
 									variant='outlined'
-									label='ENADE do seu Curso de Graduação *'
+									label={constants.enadeReq}
 									value={enade}
 									onChange={(e) => handleInput('enade', e.target.value)}
 									validators={['required']}
-									errorMessages={['Campo obrigatório']}
+									errorMessages={[constants.REQUIRED_FIELD]}
 									fullWidth
 								>	
-									<MenuItem value='1'>1</MenuItem>
-									<MenuItem value='2'>2</MenuItem>
-									<MenuItem value='3'>3</MenuItem>
-									<MenuItem value='4'>4</MenuItem>
-									<MenuItem value='5'>5</MenuItem>
+									<MenuItem value='1'>{constants.value1}</MenuItem>
+									<MenuItem value='2'>{constants.value2}</MenuItem>
+									<MenuItem value='3'>{constants.value3}</MenuItem>
+									<MenuItem value='4'>{constants.value4}</MenuItem>
+									<MenuItem value='5'>{constants.value5}</MenuItem>
 								</SelectValidator>	
 							</Grid> 
 							<Grid item xs={12} alignItems='flex-start' alignContent='flex-start'>
 								<SelectValidator
 									variant='outlined'
-									label='Área do seu Curso de Graduação *'
+									label={constants.areaReq}
 									value={area}
 									onChange={(e) => handleInput('area', e.target.value)}
 									validators={['required']}
-									errorMessages={['Campo obrigatório']}
+									errorMessages={[constants.REQUIRED_FIELD]}
 									fullWidth
 								>	
 									<MenuItem value='computacao'>
-										Ciência da Computação, Sistemas de Informação, Licenciatura em Computação, Engenharia da Computação e Engenharia de Software
+										{constants.compLabel}
 									</MenuItem>
-									<MenuItem value='matematica'>Matemática Computacional, Matemática, Estatística, Física e Engenharia Elétrica (e correlatas)</MenuItem>
-									<MenuItem value='otherExact'>Outras Ciências Exatas</MenuItem>
-									<MenuItem value='other'>Outras Áreas</MenuItem>
+									<MenuItem value='matematica'>{constants.matLabel}</MenuItem>
+									<MenuItem value='otherExact'>{constants.otherExactLabel}</MenuItem>
+									<MenuItem value='other'>{constants.otherLabel}</MenuItem>
 								</SelectValidator>	
 							</Grid> 
 						</>
 					}
 
 					<Grid item xs={12}>
-						<FormLabel component='p'>Coeficiente de Rendimento em Programas de Pós Graduação Stricto Sensu</FormLabel>
+						<FormLabel component='p'>{constants.crPos}</FormLabel>
 					</Grid>
 					<Grid item xs={12} sm={3}>
 						<TextValidator
 							id='note-crpg-input'
 							variant='outlined'
-							label='Nota *'
+							label={constants.noteCRPG}
 							value={noteCRPG}
 							onChange={(e) => handleInput('noteCRPG', e.target.value)}
 							validators={['required', 'isNote']}
-							errorMessages={['Campo obrigatório', 'Nota entre 0 e 10']}
+							errorMessages={[constants.REQUIRED_FIELD, constants.NOTE_RANGE]}
 							fullWidth
 						/>
 					</Grid>
@@ -723,26 +724,26 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 						<Grid item xs={12} sm={3}>
 							<SelectValidator
 								variant='outlined'
-								label='Conceito CAPES *'
+								label={constants.capesReq}
 								value={capes}
 								onChange={(e) => handleInput('capes', e.target.value)}
 								validators={['required']}
-								errorMessages={['Campo obrigatório']}
+								errorMessages={[constants.REQUIRED_FIELD]}
 								fullWidth
 							>	
-								<MenuItem value='2'>2</MenuItem>
-								<MenuItem value='3'>3</MenuItem>
-								<MenuItem value='4'>4</MenuItem>
-								<MenuItem value='5'>5</MenuItem>
-								<MenuItem value='6'>6</MenuItem>
-								<MenuItem value='7'>7</MenuItem>
+								<MenuItem value='2'>{constants.value2}</MenuItem>
+								<MenuItem value='3'>{constants.value3}</MenuItem>
+								<MenuItem value='4'>{constants.value4}</MenuItem>
+								<MenuItem value='5'>{constants.value5}</MenuItem>
+								<MenuItem value='6'>{constants.value6}</MenuItem>
+								<MenuItem value='7'>{constants.value7}</MenuItem>
 							</SelectValidator>	
 						</Grid>
 					}
 					<Grid item xs={12}>
 						<Grid container spacing={1} alignItems='center'>
 							<Grid item xs={true}>
-								<FormLabel>Produções Intelectuais</FormLabel>
+								<FormLabel>{constants.intelectProd}</FormLabel>
 							</Grid>
 							
 							<Grid item xs='auto' style={{textAlign: 'right'}}>
@@ -760,7 +761,7 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 									<Grid item xs={12}>
 										<Grid container spacing={1} alignItems='center'>
 											<Grid item xs={true}>
-												<FormLabel>Publicação {i+1}</FormLabel>
+												<FormLabel>{constants.publiLabel} {i+1}</FormLabel>
 											</Grid>
 											
 											<Grid item xs='auto' style={{textAlign: 'right'}}>
@@ -773,37 +774,37 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 									<Grid item xs={12} sm={8}>
 										<SelectValidator
 											variant='outlined'
-											label='Categoria *'
+											label={constants.categLabel}
 											value={prod.category}
 											onChange={(e) => handleScientifProductions(i, 'category', e.target.value)}
 											validators={['required']}
-											errorMessages={['Campo obrigatório']}
+											errorMessages={[constants.REQUIRED_FIELD]}
 											fullWidth
 										>	
-											<ListSubheader>Artigos Completos</ListSubheader>
-											<MenuItem value='A1'>A1</MenuItem>
-											<MenuItem value='A2'>A2</MenuItem>
-											<MenuItem value='B1'>B1</MenuItem>
-											<MenuItem value='B2'>B2</MenuItem>
-											<MenuItem value='B3'>B3</MenuItem>
-											<MenuItem value='B4'>B4</MenuItem>
-											<MenuItem value='B5'>B5</MenuItem>
-											<MenuItem value='SBC'>Sem QUALIS mas com selo SBC</MenuItem>
-											<ListSubheader>Outros Tipos</ListSubheader>
-											<MenuItem value='patente'>Patente Depositada</MenuItem>
-											<MenuItem value='livro'>Livro</MenuItem>
-											<MenuItem value='capitulo'>Capítulo de Livro ou Organização de Livro</MenuItem>
-											<MenuItem value='resumo'>Resumo Estendido</MenuItem>
-											<MenuItem value='minicurso'>Minicurso ou Tutorial Ministrado em Conferência</MenuItem>
-											<MenuItem value='relatorio'>Relatório Técnico do PGCOMP</MenuItem>
+											<ListSubheader>{constants.fullArt}</ListSubheader>
+											<MenuItem value='A1'>{constants.valueA1}</MenuItem>
+											<MenuItem value='A2'>{constants.valueA2}</MenuItem>
+											<MenuItem value='B1'>{constants.valueB1}</MenuItem>
+											<MenuItem value='B2'>{constants.valueB2}</MenuItem>
+											<MenuItem value='B3'>{constants.valueB3}</MenuItem>
+											<MenuItem value='B4'>{constants.valueB4}</MenuItem>
+											<MenuItem value='B5'>{constants.valueB5}</MenuItem>
+											<MenuItem value='SBC'>{constants.sbc}</MenuItem>
+											<ListSubheader>{constants.otherTypes}</ListSubheader>
+											<MenuItem value='patente'>{constants.patent}</MenuItem>
+											<MenuItem value='livro'>{constants.book}</MenuItem>
+											<MenuItem value='capitulo'>{constants.chapter}</MenuItem>
+											<MenuItem value='resumo'>{constants.summary}</MenuItem>
+											<MenuItem value='minicurso'>{constants.minicurso}</MenuItem>
+											<MenuItem value='relatorio'>{constants.relatorio}</MenuItem>
 										</SelectValidator>	
 									</Grid>
 									<Grid item xs={4} alignContent='flex-end'>
 										<FormControl color='primary'>
-											<FormLabel>Publicação</FormLabel>
+											<FormLabel>{constants.publiLabel}</FormLabel>
 											<RadioGroup value={prod.publicationMode} name='noteType' row onChange={e => handleScientifProductions(i, 'publicationMode', e.target.value)}>
-												<FormControlLabel value='link' label='Link' control={<Radio color='primary'/>}/>
-												<FormControlLabel value='file' label='Arquivo' control={<Radio color='primary'/>}/>
+												<FormControlLabel value='link' label={constants.linkLabel} control={<Radio color='primary'/>}/>
+												<FormControlLabel value='file' label={constants.fileLabel} control={<Radio color='primary'/>}/>
 											</RadioGroup>
 										</FormControl>
 									</Grid>	
@@ -812,11 +813,11 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 										<Grid item xs={12}>
 											<TextValidator
 												variant='outlined'
-												label='Link para a Publicação *'
+												label={constants.publiLinkReq}
 												value={prod.publicationLink}
 												onChange={(e) => handleScientifProductions(i, 'publicationLink', e.target.value)}
 												validators={['required', 'isURL']}
-												errorMessages={['Campo obrigatório', 'URL incorreta']}
+												errorMessages={[constants.REQUIRED_FIELD, constants.URL_INVALID]}
 												fullWidth
 											/>
 										</Grid>
@@ -824,15 +825,15 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 									{
 										prod.publicationMode === 'file' &&
 										<Grid item xs={12}>
-											<FormLabel component='p'>Arquivo Publicação *</FormLabel>
+											<FormLabel component='p'>{constants.publiFile}</FormLabel>
 											<input id={'publication-file'+i} type='file' value='' onChange={e => handleScientifProductions(i, 'publicationFile', e.target.files[0])} hidden/>
 											<Button fullWidth={false} variant='outlined' color='primary' size='small' onClick={() => clickFile('#publication-file'+i)}>
-												Adicionar Arquivo
+												{constants.addFile}
 											</Button>
 											{
 												prod.publicationFile.value.size !== 0 && 
 												<Button style={{marginLeft: '5px'}} onClick={e => handleScientifProductions(i, 'publicationFile', new File([], ''))}>
-													Remover
+													{constants.remove}
 												</Button>
 											}
 											<Typography variant='subtitle2'>{prod.publicationFile.value.name}</Typography>
@@ -845,7 +846,7 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 									<Grid item xs={12}>
 										<TextValidator
 											variant='outlined'
-											label='Link para os Anais'
+											label={constants.proceedingsLink}
 											value={prod.proceedingsLink}
 											onChange={(e) => handleScientifProductions(i, 'proceedingsLink', e.target.value)}
 											fullWidth
@@ -854,7 +855,7 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 									<Grid item xs={12}>
 										<TextValidator
 											variant='outlined'
-											label='Link do Evento'
+											label={constants.eventLink}
 											value={prod.eventLink}
 											onChange={(e) => handleScientifProductions(i, 'eventLink', e.target.value)}
 											fullWidth
@@ -866,14 +867,14 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 						))
 					}
 					<Grid item xs={12}>
-						<FormLabel component='p'>Histórico acadêmico de curso(s) de Pós-Graduação Strictu Sensu</FormLabel>
+						<FormLabel component='p'>{constants.graduateTranscript}</FormLabel>
 						<input id='graduate-transcript' type='file' value='' onChange={e => handleInput('graduateTranscript', e.target.files[0])} hidden/>
 						<Button fullWidth={false} variant='outlined' color='primary' size='small' onClick={() => clickFile('#graduate-transcript')}>
-							Adicionar Arquivo
+							{constants.addFile}
 						</Button>
 						{
 							graduateTranscript.value.size !== 0 && 
-							<Button style={{marginLeft: '5px'}} onClick={e => handleInput('graduateTranscript', new File([], '	'))}>Remover</Button>
+							<Button style={{marginLeft: '5px'}} onClick={e => handleInput('graduateTranscript', new File([], '	'))}>{constants.remove}</Button>
 						}
 						<Typography variant='subtitle2'>{graduateTranscript.value.name}</Typography>
 						{
@@ -882,14 +883,14 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 						}
 					</Grid>
 					<Grid item xs={12}>
-						<FormLabel component='p'>Histórico acadêmico de curso(s) de graduação (em PDF, apenas para mestrandos)</FormLabel>
+						<FormLabel component='p'>{constants.undergradTranscript}</FormLabel>
 						<input id='undergraduate-transcript' type='file' value='' onChange={e => handleInput('undergraduateTranscript', e.target.files[0])} hidden/>
 						<Button fullWidth={false} variant='outlined' color='primary' size='small' onClick={() => clickFile('#undergraduate-transcript')}>
-							Adicionar Arquivo
+							{constants.addFile}
 						</Button>
 						{
 							undergraduateTranscript.value.size !== 0 && 
-							<Button style={{marginLeft: '5px'}} onClick={e => handleInput('undergraduateTranscript', new File([], '	'))}>Remover</Button>
+							<Button style={{marginLeft: '5px'}} onClick={e => handleInput('undergraduateTranscript', new File([], '	'))}>{constants.remove}</Button>
 						}
 						<Typography variant='subtitle2'>{undergraduateTranscript.value.name}</Typography>
 						{
@@ -900,7 +901,7 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 					
 					<Grid item xs={12}>
 						<Button disabled={degree === ''} color='primary' variant='contained' type='submit'>
-							{isRegistering ? <CircularProgress color='default' size={24}/> : edit ? 'Atualizar' : "Inscrever-se"}
+							{isRegistering ? <CircularProgress color='default' size={24}/> : edit ? constants.update : constants.subscribe}
 						</Button>
 					</Grid>
 				</Grid>

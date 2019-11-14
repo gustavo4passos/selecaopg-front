@@ -3,6 +3,7 @@ import React from 'react'
 import { Paper, makeStyles, Typography, Grid } from '@material-ui/core'
 
 import logoUFBA from '../assets/imgs/logoufba.png'
+import { constants } from '../constants/constants';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -29,15 +30,16 @@ function NoSelection() {
 	const classes = useStyles()
 
 	return (
-		<Paper className={classes.root}>
-			<Grid container spacing={2}>
-				<Grid item xs={12}>
-					<div className={classes.logo}>
-						<img src={logoUFBA}/>
-					</div>
-				</Grid>
-				<Grid item xs={12}>
-					<Typography className={classes.title}>Não há seleção disponível no momento. <br/>Volte mais tarde.</Typography>
+      <Paper className={classes.root}>
+				<Grid container spacing={2}>
+					<Grid item xs={12}>
+						<div className={classes.logo}>
+							<img src={logoUFBA}/>
+						</div>
+					</Grid>
+					<Grid item xs={12}>
+						<Typography className={classes.title}>{constants.noSelection}<br/> {constants.tryAgainLater}</Typography>
+					</Grid>
 				</Grid>
 			</Grid>
 		</Paper>

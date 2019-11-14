@@ -91,7 +91,7 @@ function SignIn(props) {
 								label={constants.emailLabel}
 								stateValue={[email, setEmail]}
 								validators={['required', 'isEmail']}
-								errorMessages={[constants.fieldRequired, constants.emailIncorrect]}
+								errorMessages={[constants.REQUIRED_FIELD, constants.EMAIL_INCORRECT]}
 								/>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>
@@ -100,7 +100,7 @@ function SignIn(props) {
 								type="password"
 								stateValue={[password, setPassword]}
 								validators={['required', 'isPassword']}
-								errorMessages={[constants.fieldRequired, constants.passwordShort]}
+								errorMessages={[constants.REQUIRED_FIELD, constants.PASSWORD_SHORT]}
 								/>
 						</Grid>
 						<Grid item xs className={classes.gridForm}>								
