@@ -143,8 +143,8 @@ function SignUp(props) {
 			>
 				<SnackbarContentWrapper
 					onClose={() => setSnackBar({...snackBar, open: false})}
-					variant="error"
-					message={constants.errorServer}
+					variant={snackBar.type}
+					message={snackBar.message}
 				/>
 			</Snackbar>
 		</Paper>

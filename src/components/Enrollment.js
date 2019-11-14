@@ -293,6 +293,8 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 
 		const { ENADE, Area, Capes, Categoria, Conceito } = tables
 
+		formData.append('score_type', noteType)
+		formData.append('masters_freshman', mastersFreshman)
 		if(degree == 'masters'){
 			let ira = 0;
 			let mediaEnade = ENADE[enade][0];
@@ -302,7 +304,7 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 			formData.append('enade', enade)
 			formData.append('area', area)
 
-			formData.append('score_type', noteType)
+			
 			if ( noteType == 'cr')
 				ira = Number(noteRG);
 			else
@@ -394,6 +396,8 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 
 		if (!user) return
 
+		user = JSON.parse(user)
+
 		formData.append('user_id', user.id)
 		formData.append('selection_id', selectionId)
 
@@ -407,7 +411,7 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 			handleEnrollment(response.data)
 		})
 		.catch(error => { 
-     		showError(constants.errorServer)
+     		showError(constants.ERROR_SERVER)
 			setRegistering(false)
 		})
   	}
@@ -917,8 +921,8 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 			>
 				<SnackbarContentWrapper
 					onClose={() => setSnackBar({...snackBar, open: false})}
-					variant="error"
-					message={constants.errorServer}
+					variant={snackBar.type}
+					message={snackBar.message}
 				/>
 			</Snackbar>
 		</Paper>
