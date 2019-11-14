@@ -5,6 +5,7 @@ import { Paper, makeStyles, Typography, Button, CircularProgress, Grid } from '@
 import Enrollment from './Enrollment'
 import api from '../services/api';
 import logoUFBA from '../assets/imgs/logoufba.png'
+import { constants } from 'crypto';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -40,7 +41,7 @@ function NoSelection() {
 						</div>
 					</Grid>
 					<Grid item xs={12}>
-						<Typography className={classes.title}>Não há seleção disponível no momento. <br/>Volte mais tarde.</Typography>
+						<Typography className={classes.title}>{constants.noSelection}<br/> {constants.tryAgainLater}</Typography>
 					</Grid>
 				</Grid>
 			</Paper>

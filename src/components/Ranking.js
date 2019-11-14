@@ -68,19 +68,19 @@ const Ranking = ({ranking, enrollment, selection, setEdit, handleDelete, ...prop
 					</div>
 				</Grid>
 				<Grid item xs={12} className={classes.title}>
-					Sua colocação:
+					{constants.yourRanking}
 					<div className={classes.ranking}>
 						<span>{ranking}º</span> de {selection.vacancies} vagas
 					</div>
 				</Grid>
 				
 				<Grid item xs={12} className={classes.score}>
-					Sua pontuação é de <span>{enrollment.score}</span> pontos.
+					{constants.yourScore} <span>{enrollment.score}</span> pontos.
 				</Grid>
 				<Grid item xs={12}>
 					{/* <Button color='primary' variant='contained' onClick={() => setEdit(true)}>Editar</Button>&nbsp; */}
 					<ThemeProvider theme={dangerTheme}>
-						<Button color='primary' variant='contained' onClick={() => handleDelete(enrollment.id)}>Deletar</Button>
+						<Button color='primary' variant='contained' onClick={() => handleDelete(enrollment.id)}>{constants.delete}</Button>
 					</ThemeProvider>
 				</Grid>
 			</Grid>
