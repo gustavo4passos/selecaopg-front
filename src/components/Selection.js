@@ -109,8 +109,8 @@ function Selection(props) {
 		setLoading(true)
 
 		try {
-			await api.post('/sessions/logout')
 			logout()
+			//await api.post('/sessions/logout')
 			props.history.push('/entrar')
 		} catch(err) {
 			console.log(err)
