@@ -463,7 +463,7 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 			if (validate === 'type') {
 				setInputs({...inputs, [key]: {value: new File([], ''), error: constants.FILE_ONLY_PDF}})
 			} else if (validate === 'size') {
-				setInputs({...inputs, [key]: {value: new File([], ''), error: }})
+				setInputs({...inputs, [key]: {value: new File([], ''), error: constants.FILE_SIZE}})
 			} else setInputs({...inputs, [key]: {value, error: null}})
 		} else setInputs({...inputs, [key]: value})
 	}

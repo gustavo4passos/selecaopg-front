@@ -7,6 +7,7 @@ import api from '../services/api';
 import logoUFBA from '../assets/imgs/logoufba.png'
 import { ThemeProvider } from '@material-ui/styles';
 import { red, yellow } from '@material-ui/core/colors';
+import { constants } from '../constants/constants';
 
 const useStyles = makeStyles(theme => ({
 	root: {
