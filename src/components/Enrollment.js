@@ -4,9 +4,9 @@ import { makeStyles } from '@material-ui/styles'
 import { Paper, Grid, Typography, 
 	Button, FormLabel, RadioGroup, 
 	FormControlLabel, Radio, FormControl, 
-	MenuItem, IconButton, Fab, ListSubheader, Checkbox, Snackbar, CircularProgress, SnackbarContent, TextField, FormHelperText 
+	MenuItem, Fab, ListSubheader, Checkbox, Snackbar, CircularProgress, FormHelperText 
 } from '@material-ui/core';
-import { Add, Remove, Close } from '@material-ui/icons'
+import { Add, Remove } from '@material-ui/icons'
 import { ValidatorForm, TextValidator, SelectValidator } from 'react-material-ui-form-validator'
 
 import $ from 'jquery'
@@ -155,7 +155,7 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 		undergraduateUniversity: '',
 		enadeLink: '',
 
-		degree: '', // MASTERS OR DOCTORATE
+		degree: '',
 		mastersFreshman: false,
 		
 		noteType: 'cr',
@@ -239,7 +239,6 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 		})
 		Inputmask('(99) 99999-9999').mask('#phone-input')
 		Inputmask('9999.9').mask('#semester-input')
-		// Inputmask('[9[,99]]|[1[0][,00]]').mask('#note-crpg-input')
 		
 	}, [])
 
@@ -284,8 +283,6 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 		formData.append('lattes_link', lattesLink)
 		formData.append('undergraduate_university', undergraduateUniversity)
 		formData.append('enade_link', enadeLink)
-		
-		//RG + CRPG + PI
 
 		let RG = 0;
 		let CRPG = 0;
@@ -320,7 +317,6 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 				formData.append('capes', capes)
 			}
 			
-			console.log(ira, mediaEnade, devEnade, noteArea)
 			RG = Math.min(10.0, ((ira - mediaEnade)/devEnade)*1.67 + 5.00) * Number(noteArea);
 			CRPG = noteCRPG * ponderada;
 		}
@@ -345,7 +341,6 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 			publication.eventLink = producao.eventLink
 			if(producao.publicationMode == 'link'){
 				publication.link = producao.publicationLink
-				// formPublication.append('link', producao.publicationLink);
 				publication.hasFile = false
 			}
 			else{
@@ -378,19 +373,13 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 
 			publications.push(publication);
 		}
-		// console.log('publications', publications)
+
 		formData.append('publications', JSON.stringify(publications))
-		// console.log('qualis', qualis)
-		// console.log('outros', outros)
 
 		PI = Math.min(qualis + outros, 10.0);
 
-		// console.log('RG', RG)
-		// console.log('CRPG', CRPG)
-		// console.log('PI', PI)
-
 		score = RG + CRPG + PI;
-		// console.log('score', score)
+
 		formData.append('score', score);
 
 		if(undergraduateTranscript.value.name !== '') {	
@@ -404,7 +393,7 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 		let user = getUser()
 
 		formData.append('user_id', user.id)
-		formData.append('selection_id', selectionId) // props.selection.id
+		formData.append('selection_id', selectionId)
 
 		api({
 			method: edit ? 'PUT' : 'POST',
@@ -412,12 +401,10 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 			data: formData,
 			headers: { 'content-type': 'multipart/form-data' }
 		}).then(response => { 
-			console.log(response)
 			setRegistering(false)
 			handleEnrollment(response.data)
 		})
 		.catch(error => { 
-			console.log(error)
      		showError(constants.errorServer)
 			setRegistering(false)
 		})
@@ -451,7 +438,6 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 	}
 
 	const handleInput = (key, value) => {
-		console.log('key', value)
 
 		if (key === 'noteCRPG' || key === 'noteRG') {
 			if (Number(value) != value) return
@@ -469,7 +455,6 @@ const Enrollment = ({selectionId, enrollment, handleEnrollment, edit, ...props})
 	}
 
 	const handleScientifProductions = (num, key, value) => {
-		console.log(num, key, value)
 		if (key === 'publicationFile') {
 			const validate = validateFile(value, ['pdf'], MAX_FILE_SIZE)
 

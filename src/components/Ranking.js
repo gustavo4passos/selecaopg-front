@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
+import { Paper, makeStyles, Button, Grid, createMuiTheme } from '@material-ui/core'
 
-import { Paper, makeStyles, Typography, Button, CircularProgress, Grid, createMuiTheme } from '@material-ui/core'
-
-import Enrollment from './Enrollment'
-import api from '../services/api';
 import logoUFBA from '../assets/imgs/logoufba.png'
 import { ThemeProvider } from '@material-ui/styles';
-import { red, yellow } from '@material-ui/core/colors';
+import { red } from '@material-ui/core/colors';
 
 const useStyles = makeStyles(theme => ({
 	root: {

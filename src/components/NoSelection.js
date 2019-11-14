@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 
-import { Paper, makeStyles, Typography, Button, CircularProgress, Grid } from '@material-ui/core'
+import { Paper, makeStyles, Typography, Grid } from '@material-ui/core'
 
-import Enrollment from './Enrollment'
-import api from '../services/api';
 import logoUFBA from '../assets/imgs/logoufba.png'
 
 const useStyles = makeStyles(theme => ({
